@@ -9,14 +9,11 @@ The `NTV.test_ntv` module contains the unit tests (class unittest) for the
 """
 import unittest
 import datetime
-import json
 
 import pandas as pd
 import ntv_pandas as npd
 from shapely.geometry import Point, Polygon
-#from ntv_pandas import read_json as read_json        
-#from ntv_pandas import to_json as to_json
-#from ntv_pandas import as_def_type as as_def_type        
+    
 from json_ntv import Ntv        
 
 class Test_Pandas_Connector(unittest.TestCase):

@@ -17,7 +17,7 @@ setup(
     description="NTV-pandas : A semantic, compact and reversible JSON-pandas converter",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/loco-philippe/NTV/blob/main/README.md",
+    url="https://github.com/loco-philippe/ntv-pandas/blob/main/README.md",
     author="Philippe Thomy",
     author_email="philippe@loco-labs.io",
     classifiers=[
@@ -26,8 +26,8 @@ setup(
         "Topic :: Software Development :: Build Tools",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3"],
-    keywords="JSON-NTV, semantic JSON, development, environmental data",
-    packages=find_packages(include=['json_ntv', 'json_ntv.*']),
-    python_requires=">=3.7, <4",
-    install_requires=['shapely', 'cbor2', 'pandas']
+    keywords="pandas, JSON-NTV, semantic JSON, development, environmental data",
+    packages=find_packages(include=['ntv_pandas', 'ntv_pandas.*']),
+    python_requires=">=3.9, <4",
+    install_requires=['numpy', 'pandas']
 )
