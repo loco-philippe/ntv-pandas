@@ -5,12 +5,15 @@ Version 0.x
 0.1 RC1 (2023-09-19)
 --------------------
 - First release candidate
-- dtype:
+- functions `to_json`, `read_json` and `as_def_type` available
+- specific methods available in the class `DataFrameConnec` and `SeriesConnec`
+- correspondance between `NTVtype` and `dtype` in `ntv_pandas.ini`
+- dtype supported:
     - timedelta64[ns], datetime64[ns]
     - string
     - Floatxx, UIntxx, Intxx, boolean
     - categorical
-- NTVtype:
+- NTVtype supported:
     - duration, period
     - datetime, date, time, dat
     - month, year, day, wday, yday, week, hour, minute, second

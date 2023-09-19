@@ -30,7 +30,7 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 
-import json_ntv
+import ntv_pandas
 from json_ntv.ntv import Ntv, NtvConnector, NtvList, NtvSingle
 from json_ntv.ntv_connector import ShapelyConnec
 
@@ -213,7 +213,7 @@ class SeriesConnec(NtvConnector):
     clas_obj = 'Series'
     clas_typ = 'field'
     config = configparser.ConfigParser()
-    config.read(Path(json_ntv.__file__).parent.joinpath('ntv_pandas.ini'))
+    config.read(Path(ntv_pandas.__file__).parent.joinpath('ntv_pandas.ini'))
     types = pd.DataFrame(json.loads(config['data']['type']), columns=json.loads(config['data']['column']))
     astype = json.loads(config['data']['astype'])
     deftype = {val: key for key, val in astype.items()}
