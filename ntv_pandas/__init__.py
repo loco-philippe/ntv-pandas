@@ -1,114 +1,102 @@
 # -*- coding: utf-8 -*-
 """
-***JSON-NTV Package***
+***NTV-pandas Package***
 
-Created on Fri Dec 24 15:21:14 2021
+Created on Sept 2023
 
 @author: philippe@loco-labs.io
 
-This package contains the following classes:
+This package contains the following classes and functions:
 
-- `NTV.json_ntv.namespace` :
-    - `NTV.json_ntv.namespace.Namespace`
-    - `NTV.json_ntv.namespace.NtvType`
+- `ntv-pandas.ntv_pandas.pandas_ntv_connector` :
+    - `ntv-pandas.ntv_pandas.pandas_ntv_connector.DataFrameConnec`
+    - `ntv-pandas.ntv_pandas.pandas_ntv_connector.SeriesConnec`
+    - `ntv-pandas.ntv_pandas.pandas_ntv_connector.to_json`
+    - `ntv-pandas.ntv_pandas.pandas_ntv_connector.read_json`
+    - `ntv-pandas.ntv_pandas.pandas_ntv_connector.as_def_type`
 
-        
-- `NTV.json_ntv.ntv` :
-    - `NTV.json_ntv.ntv.NtvSingle`
-    - `NTV.json_ntv.ntv.NtvList`
-    - `NTV.json_ntv.ntv.Ntv` (abstract class)
 
-- `NTV.json_ntv.ntv_patch` :
-    
-    - `NTV.json_ntv.ntv_patch.NtvOp`
-    - `NTV.json_ntv.ntv_patch.NtvPatch`
+# NTV-pandas : A semantic, compact and reversible JSON-pandas converter
 
-- `NTV.json_ntv.ntv_comment` :
-    
-    - `NTV.json_ntv.ntv_comment.NtvComment`
+# Why a NTV-pandas converter ?
 
-- `NTV.json_ntv.ntv_util` :
-    
-    - `NTV.json_ntv.ntv_util.NtvTree`
-    - `NTV.json_ntv.ntv_util.NtvJsonEncoder`
-    - `NTV.json_ntv.ntv_util.NtvError`
-    - `NTV.json_ntv.ntv_util.NtvConnector` (abstract class)    
-          
-- `NTV.json_ntv.pandas_ntv_connector` :
-    
-    - `NTV.json_ntv.pandas_ntv_connector.DataFrameConnec`
-    - `NTV.json_ntv.pandas_ntv_connector.SeriesConnec`
-    
-    
-- `NTV.json_ntv.ntv_connector` :
-    
-    - `NTV.json_ntv.ntv_connector.DataFrameConnec`
-    - `NTV.json_ntv.ntv_connector.SeriesConnec`
-    - `NTV.json_ntv.ntv_connector.NfieldConnec`
-    - `NTV.json_ntv.ntv_connector.SfieldConnec`
-    - `NTV.json_ntv.ntv_connector.NdatasetConnec`
-    - `NTV.json_ntv.ntv_connector.SdatasetConnec`
-    - `NTV.json_ntv.ntv_connector.MermaidConnec`
-    - `NTV.json_ntv.ntv_connector.CborConnec`
-    - `NTV.json_ntv.ntv_connector.ShapelyConnec` 
-       
-# 0 - Abstract
+pandas provide JSON converter but three limitations are present:
+- the JSON-pandas converter take into account a few data types,
+- the JSON-pandas converter is not always reversible (round type)
+- external dtype (e.g. TableSchema type) are not included
 
-Today, the semantic level of shared data remains low. It is very often limited 
-to the type of data defined in the exchange formats (strings for CSV formats; 
-numbers, strings, arrays and objects for JSON formats).
+# main features
 
-The proposed consists of adding a type and a name to the data exchanged (see also the 
-[JSON-NTV specification](https://github.com/loco-philippe/NTV/blob/main/documentation/JSON-NTV-standard.pdf)).
+The NTV-pandas converter uses the [semantic NTV format]
+(https://loco-philippe.github.io/ES/JSON%20semantic%20format%20(JSON-NTV).htm) 
+to include a large set of data types in a JSON representation.
+The converter integrates:
+- all the pandas `dtype` and the data-type associated to a JSON representation,
+- an always reversible conversion,
+- a full compatibility with TableSchema specification
 
-With this evolution any data, whatever its semantic level, can be identified, 
-shared and interpreted in a consistent way.
-The implementation of a type with a nested structure facilitates its appropriation.
-Finally, compatibility with existing JSON structures allows progressive deployment.
+# example
 
-# 1 - NTV structure
+In the example below, a DataFrame with several data types is converted to JSON.
 
-The constructed entities (called NTV for *named typed value*) are therefore a triplet
- with one mandatory element (the value in JSON format) and two optional elements (name, type).
->
-> *For example, the location of Paris can be represented by:*
-> - *a name: "Paris",*
-> - *a type: the coordinates of a point according to the GeoJSON format,*
-> - *a value: [ 2.3522, 48.8566]*
+The DataFrame resulting from this JSON is identical to the initial DataFrame (reversibility).
 
-The easiest way to add this information is to use a JSON-object with a single member
- using the syntax [JSON-ND](https://github.com/glenkleidon/JSON-ND) for the first 
- term of the member and the JSON-value for the second term of the member.
->
-> *For the example above, the JSON representation is:*    
-> *```{ "paris:point" : [2.3522, 48.8566] }```*
+With the existing JSON interface, this conversion is not possible.
 
-With this approach, three NTV entities are defined:
-- a primitive entity which is not composed of any other entity (NTV-single),
-- two structured entities: an unordered collection of NTV entities (NTV-set) and
- an ordered sequence of NTV entities (NTV-list).
-      
-as well as two JSON formats:
-- simple format when the name and the type are not present (this is the usual case of CSV data),
-- named format when the name or type is present (see example above for an NTV-single
-entity and below for a structured entity).
->
-> *Example of an entity composed of two other entities:*
-> - *```{ "cities::point": [[2.3522, 48.8566], [4.8357, 45.7640]] }``` for an NTV-list entity*
-> - *```{ "cities::point": { "paris":[2.3522, 48.8566], "lyon":[4.8357, 45.7640] } }``` 
-for an NTV-set entity*
->
-> *Note: This syntax can also be used for CSV file headers*
+*data example*
+```python
+In [1]: from shapely.geometry import Point
+        from datetime import date
+        import pandas as pd
+        import ntv_pandas as npd
 
-The type incorporates a notion of `namespaces` that can be nested.
-> *For example, the type: "ns1.ns2.type" means that:*
-> - *ns1. is a namespace defined in the global namespace,*
-> - *ns2. is a namespace defined in the ns1 namespace.,*
-> - *type is defined in the ns2 namespace.*    
-    
-This structuring of type makes it possible to reference any type of data that has
- a JSON representation and to consolidate all the shared data structures within the
- same tree of types.
+In [2]: data = {'index':           [100, 200, 300, 400, 500, 600],
+                'dates::date':     pd.Series([date(1964,1,1), date(1985,2,5), date(2022,1,21), date(1964,1,1), date(1985,2,5), date(2022,1,21)]),
+                'value':           [10, 10, 20, 20, 30, 30],
+                'value32':         pd.Series([12, 12, 22, 22, 32, 32], dtype='int32'),
+                'res':             [10, 20, 30, 10, 20, 30],
+                'coord::point':    pd.Series([Point(1,2), Point(3,4), Point(5,6), Point(7,8), Point(3,4), Point(5,6)]),
+                'names':           pd.Series(['john', 'eric', 'judith', 'mila', 'hector', 'maria'], dtype='string'),
+                'unique':          True }
+
+In [3]: df = pd.DataFrame(data).set_index('index')
+
+In [4]: df
+Out[4]:
+              dates::date  value  value32  res coord::point   names  unique
+        index
+        100    1964-01-01     10       12   10  POINT (1 2)    john    True
+        200    1985-02-05     10       12   20  POINT (3 4)    eric    True
+        300    2022-01-21     20       22   30  POINT (5 6)  judith    True
+        400    1964-01-01     20       22   10  POINT (7 8)    mila    True
+        500    1985-02-05     30       32   20  POINT (3 4)  hector    True
+        600    2022-01-21     30       32   30  POINT (5 6)   maria    True
+```
+
+*JSON representation*
+
+```python
+In [5]: df_to_json = npd.to_json(df)
+        pprint(df_to_json, compact=True, width=120)
+Out[5]:
+        {':tab': {'coord::point': [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0], [7.0, 8.0], [3.0, 4.0], [5.0, 6.0]],
+                  'dates::date': ['1964-01-01', '1985-02-05', '2022-01-21', '1964-01-01', '1985-02-05', '2022-01-21'],
+                  'index': [100, 200, 300, 400, 500, 600],
+                  'names::string': ['john', 'eric', 'judith', 'mila', 'hector', 'maria'],
+                  'res': [10, 20, 30, 10, 20, 30],
+                  'unique': [True, True, True, True, True, True],
+                  'value': [10, 10, 20, 20, 30, 30],
+                  'value32::int32': [12, 12, 22, 22, 32, 32]}}
+```
+
+*Reversibility*
+
+```python
+In [5]: df_from_json = npd.read_json(df_to_json)
+        print('df created from JSON is equal to initial df ? ', df_from_json.equals(df))
+
+Out[5]: df created from JSON is equal to initial df ?  True
+```
 
 
 """

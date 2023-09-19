@@ -1,0 +1,22 @@
+Version 0.x
+===========
+
+
+0.1 RC1 (2023-09-19)
+--------------------
+- First release candidate
+- dtype:
+    - timedelta64[ns], datetime64[ns]
+    - string
+    - Floatxx, UIntxx, Intxx, boolean
+    - categorical
+- NTVtype:
+    - duration, period
+    - datetime, date, time, dat
+    - month, year, day, wday, yday, week, hour, minute, second
+    - json, string, number, boolean, array, object, null
+    - floatxx, uintxx, intxx
+    - uri, email, file
+    - point, line, polygon, geometry, geojson
+    - multipoint, multiline, multipolygon, box, codeolc
+    - row, field, tab, ntv

@@ -9,14 +9,15 @@ The `NTV.test_ntv` module contains the unit tests (class unittest) for the
 """
 import unittest
 import datetime
-import pandas as pd
-from shapely.geometry import Point, Polygon
-from ntv_pandas import read_json as read_json        
-from ntv_pandas import to_json as to_json
-from ntv_pandas import as_def_type as as_def_type        
-from json_ntv import Ntv        
+import json
 
-from shapely import geometry
+import pandas as pd
+import ntv_pandas as npd
+from shapely.geometry import Point, Polygon
+#from ntv_pandas import read_json as read_json        
+#from ntv_pandas import to_json as to_json
+#from ntv_pandas import as_def_type as as_def_type        
+from json_ntv import Ntv        
 
 class Test_Pandas_Connector(unittest.TestCase):
     
@@ -85,10 +86,10 @@ class Test_Pandas_Connector(unittest.TestCase):
         ]
         for sr in srs:
             #print(Ntv.obj(sr))
-            self.assertTrue(as_def_type(sr).equals(Ntv.obj(sr).to_obj(format='obj')))
+            self.assertTrue(npd.as_def_type(sr).equals(Ntv.obj(sr).to_obj(format='obj')))
             self.assertEqual(Ntv.obj(sr).to_obj(format='obj').name, sr.name)
-            self.assertTrue(as_def_type(sr).equals(read_json(to_json(sr))))
-            self.assertEqual(read_json(to_json(sr)).name, sr.name)            
+            self.assertTrue(npd.as_def_type(sr).equals(npd.read_json(npd.to_json(sr))))
+            self.assertEqual(npd.read_json(npd.to_json(sr)).name, sr.name)            
 
     def test_json_sfield_full(self):
 
@@ -113,6 +114,7 @@ class Test_Pandas_Connector(unittest.TestCase):
             ntv = Ntv.from_obj({':field': a})
             #print(ntv)
             self.assertEqual(Ntv.obj(ntv.to_obj(format='obj')), ntv)            
+            self.assertEqual(npd.to_json(npd.read_json(ntv)), ntv.to_obj())            
             
     def test_json_sfield_default(self):
 
@@ -135,6 +137,7 @@ class Test_Pandas_Connector(unittest.TestCase):
             ntv = Ntv.from_obj({':field': a})
             #print(ntv)
             self.assertEqual(Ntv.obj(ntv.to_obj(format='obj')), ntv)            
+            self.assertEqual(npd.to_json(npd.read_json(ntv)), ntv.to_obj())            
 
 
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Sep 29 22:40:54 2022
+Created on Thu Sep 19 2023
 
 @author: philippe@loco-labs.io
 """
@@ -12,9 +12,9 @@ here = pathlib.Path(__file__).parent.resolve()
 long_description = (here / "README.md").read_text(encoding="utf-8")
 
 setup(
-    name="json_ntv",
+    name="ntv_pandas",
     version="0.1.0",
-    description="JSON-NTV a semantic format for interoperability",
+    description="NTV-pandas : A semantic, compact and reversible JSON-pandas converter",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/loco-philippe/NTV/blob/main/README.md",

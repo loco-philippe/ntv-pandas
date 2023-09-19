@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Sep 30 10:09:01 2022
+Created on Fri Sep 19 2023
 
 @author: philippe@loco-labs.io
 """
 
-name = 'json_ntv'
+name = 'ntv_pandas'
