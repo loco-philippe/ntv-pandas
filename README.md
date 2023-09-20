@@ -94,6 +94,12 @@ dependency:
 - `shapely`: for the location data,
 - `pandas` 
 
+# Documentation
+
+- [Specification](https://github.com/loco-philippe/ntv-pandas/tree/main/docs/README.md)
+- [Example](https://github.com/loco-philippe/ntv-pandas/tree/main/example/README.md)
+- [Python Connectors](https://github.com/loco-philippe/ntv-pandas/tree/main/docs/README.md)
+
 # roadmap
 
 - **type extension** : interval dtype and sparse format not yet included
