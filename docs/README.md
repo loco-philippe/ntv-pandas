@@ -1,6 +1,7 @@
 # Documentation
 
-- [Specification](https://github.com/loco-philippe/NTV/tree/main/documentation/README.md)
+- [Specification](https://loco-philippe.github.io/ES/JSON%20semantic%20format%20(JSON-NTV).htm)
 - [Example](https://github.com/loco-philippe/NTV/tree/main/example/README.md)
-- [Python Connectors documentation](https://loco-philippe.github.io/NTV/json_ntv.html)
-- [installation and package](https://github.com/loco-philippe/NTV/tree/main/json_ntv/README.md)
+- Python Connectors documentation
+  - [v1.1.1](https://loco-philippe.github.io/ntv-pandas/v0.1.1/ntv_pandas.html)
+- [Release](./release)
