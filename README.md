@@ -1,7 +1,8 @@
-### *NTV-pandas : A semantic, compact and reversible JSON-pandas converter*
+### *NTV-pandas : A semantic, compact and reversible JSON-pandas converter*    
+     
 <img src="https://loco-philippe.github.io/ES/json-ntv.PNG" alt="json-NTV" align="left" style="width:252px;height:69px;">
-<img src="https://loco-philippe.github.io/ES/pandas.png" alt="pandas" align="right" style="width:252px;height:69px;">
-
+<img src="https://loco-philippe.github.io/ES/pandas.png" alt="pandas" align="right" style="width:252px;height:69px;">     
+      
 # Why a NTV-pandas converter ?
 pandas provide JSON converter but three limitations are present:
 - the JSON-pandas converter take into account a few data types,
@@ -17,7 +18,7 @@ The converter integrates:
 - an always reversible conversion,
 - a full compatibility with TableSchema specification
 
-NTV-pandas was developped initially in the [json-NTV project](https://github.com/loco-philippe/NTV)
+NTV-pandas was developped originally in the [json-NTV project](https://github.com/loco-philippe/NTV)
 
 # example
 
@@ -32,7 +33,7 @@ With the existing JSON interface, this conversion is not possible.
 In [1]: from shapely.geometry import Point
         from datetime import date
         import pandas as pd
-        import ntv-pandas as npd
+        import ntv_pandas as npd
 
 In [2]: data = {'index':           [100, 200, 300, 400, 500, 600],
                 'dates::date':     pd.Series([date(1964,1,1), date(1985,2,5), date(2022,1,21), date(1964,1,1), date(1985,2,5), date(2022,1,21)]),
