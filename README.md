@@ -1,6 +1,6 @@
 ### *NTV-pandas : A semantic, compact and reversible JSON-pandas converter*
 <img src="https://loco-philippe.github.io/ES/json-ntv.PNG" alt="json-NTV" align="left" style="width:252px;height:69px;">
-<img src="https://loco-philippe.github.io/ES/pandas.png" alt="pandas" style="float:right;width:252px;height:69px;">
+<img src="https://loco-philippe.github.io/ES/pandas.png" alt="pandas" align="right" style="width:252px;height:69px;">
 
 # Why a NTV-pandas converter ?
 pandas provide JSON converter but three limitations are present:
@@ -16,6 +16,8 @@ The converter integrates:
 - all the pandas `dtype` and the data-type associated to a JSON representation,
 - an always reversible conversion,
 - a full compatibility with TableSchema specification
+
+NTV-pandas was developped initially in the [json-NTV project](https://github.com/loco-philippe/NTV)
 
 # example
 
@@ -81,13 +83,16 @@ Out[5]: df created from JSON is equal to initial df ?  True
 ```
 # installation
 
-`ntv-pandas` itself is a pure Python package. It can be installed with pip 
+`ntv-pandas` itself is a pure Python package maintained on [ntv-pandas github repository](https://github.com/loco-philippe/ntv-pandas).     
+     
+It can be installed with `pip`. 
 
     pip install ntv-pandas
 
 dependency:
-- `json-ntv` support the NTV format,
-- `shapely` for the location data,
+- `json-ntv`: support the NTV format,
+- `shapely`: for the location data,
+- `pandas` 
 
 # roadmap
 
@@ -96,3 +101,4 @@ dependency:
 - **null JSON data** : strategy to define
 - **multidimensional** : extension of the NTV format for multidimensional data (e.g. Xarray)   
 - **pandas type** : support for Series or DataFrame which include pandas data
+- **data consistency** : controls between NTVtype and NTVvalue

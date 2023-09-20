@@ -13,7 +13,7 @@ long_description = (here / "README.md").read_text(encoding="utf-8")
 
 setup(
     name="ntv_pandas",
-    version="0.1.0",
+    version="0.1.1",
     description="NTV-pandas : A semantic, compact and reversible JSON-pandas converter",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -28,6 +28,7 @@ setup(
         "Programming Language :: Python :: 3"],
     keywords="pandas, JSON-NTV, semantic JSON, development, environmental data",
     packages=find_packages(include=['ntv_pandas', 'ntv_pandas.*']),
+    package_data={'ntv_pandas': ['*.ini']},
     python_requires=">=3.9, <4",
-    install_requires=['numpy', 'pandas']
+    install_requires=['numpy', 'pandas', 'shapely']
 )

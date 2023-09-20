@@ -1,8 +1,11 @@
 Version 0.x
 ===========
 
+0.1.1 RC1 (2023-09-19)
+--------------------
+- bug setup
 
-0.1 RC1 (2023-09-19)
+0.1.0 RC1 (2023-09-19)
 --------------------
 - First release candidate
 - functions `to_json`, `read_json` and `as_def_type` available
