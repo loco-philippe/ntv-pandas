@@ -1,9 +1,7 @@
 ### *NTV-pandas : A semantic, compact and reversible JSON-pandas converter*    
 
-<img src="https://loco-philippe.github.io/ES/json-ntv.PNG" alt="json-NTV" align="left" style="width:252px;height:69px;">
-<img src="https://loco-philippe.github.io/ES/pandas.png" alt="pandas" style="float:right;width:252px;height:69px;">
-    
-    
+<img src="https://loco-philippe.github.io/ES/ntv_pandas.png" alt="ntv-pandas" align="middle" style="height:80px;">
+
 # Why a NTV-pandas converter ?
 pandas provide JSON converter but three limitations are present:
 - the JSON-pandas converter take into account a few data types,
