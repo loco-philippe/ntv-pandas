@@ -81,7 +81,7 @@ In [5]: df_from_json = npd.read_json(df_to_json)
 
 Out[5]: df created from JSON is equal to initial df ?  True
 ```
-# installation
+# installation and documentation
 
 `ntv-pandas` itself is a pure Python package maintained on [ntv-pandas github repository](https://github.com/loco-philippe/ntv-pandas).     
      
@@ -94,11 +94,7 @@ dependency:
 - `shapely`: for the location data,
 - `pandas` 
 
-# Documentation
-
-- [Specification](https://github.com/loco-philippe/ntv-pandas/tree/main/docs/README.md)
-- [Example](https://github.com/loco-philippe/ntv-pandas/tree/main/example/README.md)
-- [Python Connectors](https://github.com/loco-philippe/ntv-pandas/tree/main/docs/README.md)
+[Documentation](https://github.com/loco-philippe/ntv-pandas/tree/main/docs/README.md)
 
 # roadmap
 
