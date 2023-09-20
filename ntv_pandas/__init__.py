@@ -27,8 +27,8 @@ pandas provide JSON converter but three limitations are present:
 
 # main features
 
-The NTV-pandas converter uses the [semantic NTV format]
-(https://loco-philippe.github.io/ES/JSON%20semantic%20format%20(JSON-NTV).htm) 
+The NTV-pandas converter uses the [semantic NTV format
+](https://loco-philippe.github.io/ES/JSON%20semantic%20format%20(JSON-NTV).htm) 
 to include a large set of data types in a JSON representation.
 The converter integrates:
 - all the pandas `dtype` and the data-type associated to a JSON representation,
