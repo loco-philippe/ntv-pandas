@@ -46,7 +46,7 @@ def to_json(pd_array, **kwargs):
     ''' 
     option = {'encoded': False, 'header': True, 'table': False} | kwargs
     option['header'] = False if option['table'] else option['header']
-    print(option['table'])
+    #print(option['table'])
     if isinstance(pd_array, pd.Series):
         jsn = SeriesConnec.to_json_ntv(pd_array, table=option['table'])[0]
         head = ':field'
@@ -216,9 +216,15 @@ class SeriesConnec(NtvConnector):
     clas_typ = 'field'
     config = configparser.ConfigParser()
     config.read(Path(ntv_pandas.__file__).parent.joinpath('ntv_pandas.ini'))
-    types = pd.DataFrame(json.loads(config['data']['type']), columns=json.loads(config['data']['column']))
+    types = pd.DataFrame(json.loads(config['data']['type']), 
+                         columns=json.loads(config['data']['column']))
     astype = json.loads(config['data']['astype'])
     deftype = {val: key for key, val in astype.items()}
+    config = configparser.ConfigParser()
+    config.read(Path(ntv_pandas.__file__).parent.joinpath('ntv_table.ini'))
+    table = pd.DataFrame(json.loads(config['data']['mapping']), 
+                         columns=json.loads(config['data']['column']))
+
 
     @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):
@@ -302,14 +308,13 @@ class SeriesConnec(NtvConnector):
         - **table** : boolean (default False) - if True return TableSchema format'''
 
         table = kwargs.get('table', False)
-        print(table)
         srs = value.astype(SeriesConnec.astype.get(value.dtype.name, value.dtype.name))
         sr_name = srs.name if srs.name else ''
         ntv_name, name_type = Ntv.from_obj_name(sr_name)[:2]
 
         if table:
             ntv_type = SeriesConnec._ntv_type(name_type, srs.dtype.name)
-            ntv_value = SeriesConnec._table_val(ntv_type, srs)
+            ntv_value = SeriesConnec._table_val(ntv_type, ntv_name, srs)
             return (ntv_value, ntv_name, ntv_type)
         if srs.dtype.name == 'category':
             cdc = pd.Series(srs.cat.categories)
@@ -328,8 +333,6 @@ class SeriesConnec(NtvConnector):
                     SeriesConnec.clas_typ if not typ else typ)
         return (NtvList(ntv_value, ntv_name, ntv_type).to_obj(), name,
                 SeriesConnec.clas_typ if not typ else typ)
-
-
 
     @staticmethod
     def to_idx(ser):
@@ -374,7 +377,7 @@ class SeriesConnec(NtvConnector):
         len_unique = option['leng'] if len(
             ntv_codec) == 1 and option['leng'] else 1
         pd_convert = ntv_type in types.index
-
+        
         dtype = types.loc[ntv_type]['dtype'] if pd_convert else 'object'
         ntv_obj, pd_name, name_type = SeriesConnec._val_nam_typ(
             ntv_codec, ntv_type, ntv_name, pd_convert, option['annotated'])
@@ -486,7 +489,7 @@ class SeriesConnec(NtvConnector):
                         date_format='iso', default_handler=str))
 
     @staticmethod
-    def _table_val(ntv_type, srs):
+    def _table_val(ntv_type, ntv_name, srs):
         ''' convert a simple Series into NTV json-value.
 
         *Parameters*
@@ -499,7 +502,19 @@ class SeriesConnec(NtvConnector):
             srs = srs.apply(ShapelyConnec.to_geojson)
         elif ntv_type == 'date':
             srs = srs.astype(str)
+        srs.name = ntv_name
         table_val = json.loads(srs.to_json(orient='table',
                         date_format='iso', default_handler=str))
-        table_val[]
+        name = 'values' if srs.name is None else srs.name 
+        table_val['schema'] = SeriesConnec._table_schema(table_val['schema'], 
+                                                         name, ntv_type)
         return table_val    
+    
+    @staticmethod 
+    def _table_schema(schema, name, ntv_type):
+        ind = [field['name'] for field in schema['fields']].index(name)
+        types = SeriesConnec.table.set_index('ntv_type')
+        schema['fields'][ind]['format'] = types.loc[ntv_type]['format']
+        schema['fields'][ind]['type'] = types.loc[ntv_type]['type']
+        #print(ind, schema['fields'][ind])
+        return schema
