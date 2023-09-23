@@ -46,6 +46,7 @@ def to_json(pd_array, **kwargs):
     ''' 
     option = {'encoded': False, 'header': True, 'table': False} | kwargs
     option['header'] = False if option['table'] else option['header']
+    print(option['table'])
     if isinstance(pd_array, pd.Series):
         jsn = SeriesConnec.to_json_ntv(pd_array, table=option['table'])[0]
         head = ':field'
@@ -301,7 +302,7 @@ class SeriesConnec(NtvConnector):
         - **table** : boolean (default False) - if True return TableSchema format'''
 
         table = kwargs.get('table', False)
-        
+        print(table)
         srs = value.astype(SeriesConnec.astype.get(value.dtype.name, value.dtype.name))
         sr_name = srs.name if srs.name else ''
         ntv_name, name_type = Ntv.from_obj_name(sr_name)[:2]
@@ -309,7 +310,7 @@ class SeriesConnec(NtvConnector):
         if table:
             ntv_type = SeriesConnec._ntv_type(name_type, srs.dtype.name)
             ntv_value = SeriesConnec._table_val(ntv_type, srs)
-            return ({"schema":{"fields":[ntv_type]}, "data": ntv_value}, ntv_name, ntv_type)
+            return (ntv_value, ntv_name, ntv_type)
         if srs.dtype.name == 'category':
             cdc = pd.Series(srs.cat.categories)
             ntv_type = SeriesConnec._ntv_type(name_type, cdc.dtype.name)
@@ -493,12 +494,12 @@ class SeriesConnec(NtvConnector):
         - **ntv_type** : string - NTVtype deduced from the Series name_type and dtype,
         - **srs** : Series to be converted.'''
         if ntv_type in ['point', 'line', 'polygon', 'geometry']:
-            return srs.apply(ShapelyConnec.to_coord).to_list()
-        if ntv_type == 'geojson':
-            return srs.apply(ShapelyConnec.to_geojson).to_list()
-        if ntv_type == 'date':
+            srs = srs.apply(ShapelyConnec.to_coord)
+        elif ntv_type == 'geojson':
+            srs = srs.apply(ShapelyConnec.to_geojson)
+        elif ntv_type == 'date':
             srs = srs.astype(str)
-        if srs.dtype.name == 'object':
-            return srs.to_list()
-        return json.loads(srs.to_json(orient='records',
-                        date_format='iso', default_handler=str))    
+        table_val = json.loads(srs.to_json(orient='table',
+                        date_format='iso', default_handler=str))
+        table_val[]
+        return table_val    
