@@ -470,6 +470,22 @@ class SeriesConnec(NtvConnector):
         return name_type
 
     @staticmethod
+    def _convert(ntv_type, srs):
+        ''' convert Series with external NTVtype.
+
+        *Parameters*
+
+        - **ntv_type** : string - NTVtype deduced from the Series name_type and dtype,
+        - **srs** : Series to be converted.'''
+        if ntv_type in ['point', 'line', 'polygon', 'geometry']:
+            return srs.apply(ShapelyConnec.to_coord)
+        if ntv_type == 'geojson':
+            return srs.apply(ShapelyConnec.to_geojson)
+        if ntv_type == 'date':
+            return srs.astype(str)
+        return srs
+
+    @staticmethod
     def _ntv_val(ntv_type, srs):
         ''' convert a simple Series into NTV json-value.
 
@@ -496,12 +512,13 @@ class SeriesConnec(NtvConnector):
 
         - **ntv_type** : string - NTVtype deduced from the Series name_type and dtype,
         - **srs** : Series to be converted.'''
-        if ntv_type in ['point', 'line', 'polygon', 'geometry']:
+        srs = SeriesConnec._convert(ntv_type, srs)
+        """if ntv_type in ['point', 'line', 'polygon', 'geometry']:
             srs = srs.apply(ShapelyConnec.to_coord)
         elif ntv_type == 'geojson':
             srs = srs.apply(ShapelyConnec.to_geojson)
         elif ntv_type == 'date':
-            srs = srs.astype(str)
+            srs = srs.astype(str)"""
         srs.name = ntv_name
         table_val = json.loads(srs.to_json(orient='table',
                         date_format='iso', default_handler=str))
