@@ -149,22 +149,24 @@ class DataFrameConnec(NtvConnector):
         - **table** : boolean (default False) - if True return TableSchema format'''
 
         table = kwargs.get('table', False)
-        df2 = value.reset_index()
         if not table:
+            df2 = value.reset_index()
             jsn = Ntv.obj([SeriesConnec.to_json_ntv(DataFrameConnec._unic(
                            df2[col]))[0] for col in df2.columns]).to_obj()
             return (jsn, name, DataFrameConnec.clas_typ if not typ else typ)
-        df2 = pd.DataFrame([SeriesConnec._convert(
-                            SeriesConnec.to_json_ntv(df2[col])[1], df2[col]) 
-                            for col in df2.columns])
+        df2 = pd.DataFrame({ Ntv.from_obj_name(col)[0]: SeriesConnec._convert(
+            SeriesConnec.to_json_ntv(value[col], table=True, no_val=True)[1],
+            value[col]) for col in value.columns})
         table_val = json.loads(df2.to_json(orient='table',
                         date_format='iso', default_handler=str))
         #print(table_val)
-        #for name in df2.columns:
-        #    ntv_type = SeriesConnec.to_json_ntv(df2[name])[1]
-        #    table_val['schema'] = SeriesConnec._table_schema(table_val['schema'], 
-        #                                                 name, ntv_type)
-        return table_val    
+        for name in value.columns:
+            ntv_name, ntv_type = SeriesConnec.to_json_ntv(
+                                        value[name], table=True, no_val=True)
+            table_val['schema'] = SeriesConnec._table_schema(table_val['schema'], 
+                                                         ntv_name, ntv_type)
+        #print(table_val)
+        return (table_val, name, DataFrameConnec.clas_typ if not typ else typ)
           
     @staticmethod
     def to_listidx(dtf):
@@ -242,6 +244,13 @@ class SeriesConnec(NtvConnector):
                          columns=json.loads(config['data']['column']))
 
 
+    @staticmethod
+    def to_obj_table(jsn, **kwargs):
+        df = pd.read_json(json.dumps(jsn['data']), orient='record')
+        dtype = SeriesConnec._ntvtype_table(jsn['schema']['fields'])
+        print(df)
+        print(dtype)
+        
     @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):
         '''Generate a Series Object from a Ntv field object
@@ -475,6 +484,17 @@ class SeriesConnec(NtvConnector):
         return (ntv_obj, ntv_name + '::' + ntv_type, ntv_type)
 
     @staticmethod
+    def _ntv_table(table_format, table_type):
+        ''' return NTVtype from the TableSchema data.
+
+        *Parameters*
+
+        - **table_format** : string - TableSchema format,
+        - **table_type** : string - TableSchema type'''
+        return SeriesConnec.table.set_index(['type', 'format']).loc[
+            (table_type, table_format)].values[0]
+    
+    @staticmethod
     def _ntv_type(name_type, dtype):
         ''' return NTVtype from the Series name_type and dtype.
 
@@ -547,9 +567,17 @@ class SeriesConnec(NtvConnector):
     
     @staticmethod 
     def _table_schema(schema, name, ntv_type):
+        #ntv_name = name if not ntv_name else ntv_name
         ind = [field['name'] for field in schema['fields']].index(name)
         types = SeriesConnec.table.set_index('ntv_type')
         schema['fields'][ind]['format'] = types.loc[ntv_type]['format']
         schema['fields'][ind]['type'] = types.loc[ntv_type]['type']
+        #schema['fields'][ind]['name'] = ntv_name
         #print(ind, schema['fields'][ind])
         return schema
+
+    @staticmethod 
+    def _ntvtype_table(fields):
+        return [SeriesConnec._ntv_table(field.get('format', 'default'),
+                                        field.get('type', None)) 
+                for field in fields]

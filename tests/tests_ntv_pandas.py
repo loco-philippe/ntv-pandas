@@ -150,6 +150,14 @@ class Test_table_pandas(unittest.TestCase):
             rang = [field['name'] for field in fields].index('test')
             self.assertFalse(fields[rang]['type'] is None)
 
+    def test_dataframe(self):
+        for df in [
+            pd.DataFrame({'test::date': pd.Series([date(2021,1,5), date(2021,1,5)
+                        , date(2021,1,5)]), 'entiers': pd.Series([1,2,3])})
+               ]:
+            fields = npd.to_json(df, table=True)['schema']['fields']
+            rang = [field['name'] for field in fields].index('test')
+            self.assertFalse(fields[rang]['type'] is None)
         
 if __name__ == '__main__':
     
