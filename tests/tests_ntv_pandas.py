@@ -9,6 +9,7 @@ The `NTV.test_ntv` module contains the unit tests (class unittest) for the
 """
 import unittest
 import datetime
+from datetime import date, time
 
 import pandas as pd
 import ntv_pandas as npd
@@ -16,7 +17,7 @@ from shapely.geometry import Point, Polygon
     
 from json_ntv import Ntv        
 
-class Test_Pandas_Connector(unittest.TestCase):
+class Test_NTV_pandas(unittest.TestCase):
     
     def test_series(self):
         
@@ -136,7 +137,18 @@ class Test_Pandas_Connector(unittest.TestCase):
             self.assertEqual(Ntv.obj(ntv.to_obj(format='obj')), ntv)            
             self.assertEqual(npd.to_json(npd.read_json(ntv)), ntv.to_obj())            
 
-
+class Test_table_pandas(unittest.TestCase):
+    
+    def test_series(self):
+        
+        # json interface ok
+        for srs in [
+            pd.Series([date(2021,1,5), date(2021,1,5), date(2021,1,5)], name='test::date'),
+            pd.Series([1,2,3], name='test')
+               ]:
+            fields = npd.to_json(srs, table=True)['schema']['fields']
+            rang = [field['name'] for field in fields].index('test')
+            self.assertFalse(fields[rang]['type'] is None)
 
         
 if __name__ == '__main__':

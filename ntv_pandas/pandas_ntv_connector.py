@@ -93,6 +93,7 @@ def as_def_type(pd_array):
     return pd.DataFrame({col: as_def_type(pd_array[col]) for col in pd_array.columns})
         
 class DataFrameConnec(NtvConnector):
+    
     '''NTV connector for pandas DataFrame.
     
     Two static methods are included:
@@ -144,12 +145,27 @@ class DataFrameConnec(NtvConnector):
 
         - **typ** : string (default None) - type of the NTV object,
         - **name** : string (default None) - name of the NTV object
-        - **value** : DataFrame values'''
-        df2 = value.reset_index()
-        jsn = Ntv.obj([SeriesConnec.to_json_ntv(DataFrameConnec._unic(df2[col]))[0]
-                       for col in df2.columns]).to_obj()
-        return (jsn, name, DataFrameConnec.clas_typ if not typ else typ)
+        - **value** : DataFrame values
+        - **table** : boolean (default False) - if True return TableSchema format'''
 
+        table = kwargs.get('table', False)
+        df2 = value.reset_index()
+        if not table:
+            jsn = Ntv.obj([SeriesConnec.to_json_ntv(DataFrameConnec._unic(
+                           df2[col]))[0] for col in df2.columns]).to_obj()
+            return (jsn, name, DataFrameConnec.clas_typ if not typ else typ)
+        df2 = pd.DataFrame([SeriesConnec._convert(
+                            SeriesConnec.to_json_ntv(df2[col])[1], df2[col]) 
+                            for col in df2.columns])
+        table_val = json.loads(df2.to_json(orient='table',
+                        date_format='iso', default_handler=str))
+        #print(table_val)
+        #for name in df2.columns:
+        #    ntv_type = SeriesConnec.to_json_ntv(df2[name])[1]
+        #    table_val['schema'] = SeriesConnec._table_schema(table_val['schema'], 
+        #                                                 name, ntv_type)
+        return table_val    
+          
     @staticmethod
     def to_listidx(dtf):
         ''' convert a DataFrame in categorical data (list of dict for each column
@@ -305,9 +321,11 @@ class SeriesConnec(NtvConnector):
         - **typ** : string (default None) - type of the NTV object,
         - **name** : string (default None) - name of the NTV object
         - **value** : Series values
-        - **table** : boolean (default False) - if True return TableSchema format'''
+        - **table** : boolean (default False) - if True return (ntv_value, ntv_name, ntv_type)
+        - **no_val : boolean (default False) - if True return (ntv_name, ntv_type)'''
 
         table = kwargs.get('table', False)
+        no_val = kwargs.get('no_val', False)
         srs = value.astype(SeriesConnec.astype.get(value.dtype.name, value.dtype.name))
         sr_name = srs.name if srs.name else ''
         ntv_name, name_type = Ntv.from_obj_name(sr_name)[:2]
@@ -315,6 +333,8 @@ class SeriesConnec(NtvConnector):
         if table:
             ntv_type = SeriesConnec._ntv_type(name_type, srs.dtype.name)
             ntv_value = SeriesConnec._table_val(ntv_type, ntv_name, srs)
+            if no_val:
+                return (ntv_name, ntv_type)
             return (ntv_value, ntv_name, ntv_type)
         if srs.dtype.name == 'category':
             cdc = pd.Series(srs.cat.categories)
@@ -493,12 +513,16 @@ class SeriesConnec(NtvConnector):
 
         - **ntv_type** : string - NTVtype deduced from the Series name_type and dtype,
         - **srs** : Series to be converted.'''
+        srs = SeriesConnec._convert(ntv_type, srs)
+        if ntv_type in ['point', 'line', 'polygon', 'geometry', 'geojson']:
+            return srs.to_list()
+        """ 
         if ntv_type in ['point', 'line', 'polygon', 'geometry']:
             return srs.apply(ShapelyConnec.to_coord).to_list()
         if ntv_type == 'geojson':
             return srs.apply(ShapelyConnec.to_geojson).to_list()
         if ntv_type == 'date':
-            srs = srs.astype(str)
+            srs = srs.astype(str)"""
         if srs.dtype.name == 'object':
             return srs.to_list()
         return json.loads(srs.to_json(orient='records',
@@ -513,12 +537,6 @@ class SeriesConnec(NtvConnector):
         - **ntv_type** : string - NTVtype deduced from the Series name_type and dtype,
         - **srs** : Series to be converted.'''
         srs = SeriesConnec._convert(ntv_type, srs)
-        """if ntv_type in ['point', 'line', 'polygon', 'geometry']:
-            srs = srs.apply(ShapelyConnec.to_coord)
-        elif ntv_type == 'geojson':
-            srs = srs.apply(ShapelyConnec.to_geojson)
-        elif ntv_type == 'date':
-            srs = srs.astype(str)"""
         srs.name = ntv_name
         table_val = json.loads(srs.to_json(orient='table',
                         date_format='iso', default_handler=str))
