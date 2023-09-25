@@ -381,22 +381,24 @@ class PdUtil:
     - ntvtype_table: return a list of non index field's ntv_type from a json Table
     - table_schema: add 'format' and 'type' keys in a Json TableSchema
     - table_val: convert a Series into TableSchema json-value
-    - ntv_table: return NTVtype from the TableSchema data
-    
+    - ntv_table: return NTVtype from the TableSchema data   
     '''
     @staticmethod
     def to_obj_table(jsn, **kwargs):
         ''' convert json TableSchema data into a DataFrame or a Series'''
-        dtype = PdUtil.ntvtype_table(jsn['schema']['fields'])
+        ntv_type = PdUtil.ntvtype_table(jsn['schema']['fields'])
         name = PdUtil.name_table(jsn['schema']['fields'])
-        pd_name = [PdUtil.pd_name(nam, dtyp)[0] for nam, dtyp in zip(name, dtype)]
+        pd_name = [PdUtil.pd_name(nam, dtyp)[0] 
+                   for nam, dtyp in zip(name, ntv_type)]
         dfr = pd.read_json(json.dumps(jsn['data']), orient='record')
         if 'index' in dfr.columns:
             dfr = dfr.set_index('index')
             dfr.index.rename(None, inplace=True)
-        dfr = pd.DataFrame({col: PdUtil.convert(dtype[ind], dfr[col], to_json=False)
-                            for ind, col in enumerate(dfr.columns)})
+        dfr = pd.DataFrame({col: PdUtil.convert(ntv_type[ind], dfr[col], 
+                        to_json=False) for ind, col in enumerate(dfr.columns)})
         dfr.columns = pd_name 
+        if len(dfr.columns) == 1:
+            return dfr[dfr.columns[0]]
         return dfr
 
     @staticmethod
@@ -443,8 +445,9 @@ class PdUtil:
     @staticmethod 
     def name_table(fields):
         '''return a list of non index field's names from a json Table'''
-        return [field.get('name', None) for field in fields
+        names = [field.get('name', None) for field in fields
                 if field.get('name', None) != 'index']
+        return [ None if name == 'values' else name for name in names]
 
     @staticmethod 
     def ntvtype_table(fields):
@@ -500,9 +503,10 @@ class PdUtil:
             return srs.apply(ShapelyConnec.to_geometry)
         if ntv_type == 'geojson':
             return srs.apply(ShapelyConnec.from_geojson)
+        if ntv_type == 'datetime':
+            return pd.to_datetime(srs)
         if ntv_type == 'date':
             return pd.to_datetime(srs).dt.date
-            #return srs.apply(datetime.date.fromisoformat)
         if ntv_type == 'time':
             return pd.to_datetime(srs).dt.time
         return srs
@@ -563,6 +567,7 @@ class PdUtil:
     @staticmethod 
     def pd_name(ntv_name, ntv_type, pd_convert=True):
         '''return a tuple with the name of the Series and the type deduced from the name'''
+        ntv_name = '' if ntv_name is None else ntv_name
         if pd_convert:
             types = SeriesConnec.types.set_index('ntv_type')
             name_type = types.loc[ntv_type]['name_type'] if ntv_type != '' else ''
