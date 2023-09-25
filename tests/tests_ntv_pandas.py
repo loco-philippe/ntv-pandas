@@ -158,7 +158,7 @@ class Test_table_pandas(unittest.TestCase):
             fields = npd.to_json(df, table=True)['schema']['fields']
             rang = [field['name'] for field in fields].index('test')
             self.assertFalse(fields[rang]['type'] is None)
-        
+            self.assertTrue(df.equals(npd.read_json(npd.to_json(df, table=True))))
 if __name__ == '__main__':
     
     unittest.main(verbosity=2)

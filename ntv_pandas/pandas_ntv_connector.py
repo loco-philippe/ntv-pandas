@@ -100,10 +100,9 @@ class DataFrameConnec(NtvConnector):
     
     '''NTV connector for pandas DataFrame.
     
-    Two static methods are included:
+    One static methods is included:
     
     - to_listidx: convert a DataFrame in categorical data 
-    - decode_ntv_tab: Generate a tuple data from a NTVvalue
     '''
 
     clas_obj = 'DataFrame'
@@ -111,13 +110,15 @@ class DataFrameConnec(NtvConnector):
 
     @staticmethod
     def to_obj_table(jsn, **kwargs):
-        dtype = SeriesConnec._ntvtype_table(jsn['schema']['fields'])
-        name = SeriesConnec._name_table(jsn['schema']['fields'])
-        pd_name = [SeriesConnec._pd_name(nam, dtyp)[0] for nam, dtyp in zip(name, dtype)]
+        dtype = PdUtil.ntvtype_table(jsn['schema']['fields'])
+        name = PdUtil.name_table(jsn['schema']['fields'])
+        pd_name = [PdUtil.pd_name(nam, dtyp)[0] for nam, dtyp in zip(name, dtype)]
         dfr = pd.read_json(json.dumps(jsn['data']), orient='record')
         if 'index' in dfr.columns:
             dfr = dfr.set_index('index')
             dfr.index.rename(None, inplace=True)
+        dfr = pd.DataFrame({col: PdUtil.convert(dtype[ind], dfr[col], to_json=False)
+                            for ind, col in enumerate(dfr.columns)})
         dfr.columns = pd_name 
         return dfr
         print(dfr)
@@ -135,7 +136,7 @@ class DataFrameConnec(NtvConnector):
         series = SeriesConnec.to_series
 
         ntv = Ntv.fast(ntv_value)
-        lidx = [list(DataFrameConnec.decode_ntv_tab(ntvf))
+        lidx = [list(PdUtil.decode_ntv_tab(ntvf))
                 for ntvf in ntv]
         leng = max([idx[6] for idx in lidx])
         option = kwargs | {'leng': leng}
@@ -169,10 +170,10 @@ class DataFrameConnec(NtvConnector):
         table = kwargs.get('table', False)
         if not table:
             df2 = value.reset_index()
-            jsn = Ntv.obj([SeriesConnec.to_json_ntv(DataFrameConnec._unic(
-                           df2[col]))[0] for col in df2.columns]).to_obj()
+            jsn = Ntv.obj([SeriesConnec.to_json_ntv(PdUtil.unic(df2[col]))[0]
+                           for col in df2.columns]).to_obj()
             return (jsn, name, DataFrameConnec.clas_typ if not typ else typ)
-        df2 = pd.DataFrame({ NtvUtil.from_obj_name(col)[0]: SeriesConnec._convert(
+        df2 = pd.DataFrame({ NtvUtil.from_obj_name(col)[0]: PdUtil.convert(
             SeriesConnec.to_json_ntv(value[col], table=True, no_val=True)[1],
             value[col]) for col in value.columns})
         table_val = json.loads(df2.to_json(orient='table',
@@ -181,7 +182,7 @@ class DataFrameConnec(NtvConnector):
         for name in value.columns:
             ntv_name, ntv_type = SeriesConnec.to_json_ntv(
                                         value[name], table=True, no_val=True)
-            table_val['schema'] = SeriesConnec._table_schema(table_val['schema'], 
+            table_val['schema'] = PdUtil.table_schema(table_val['schema'], 
                                                          ntv_name, ntv_type)
         #print(table_val)
         return (table_val, name, DataFrameConnec.clas_typ if not typ else typ)
@@ -191,52 +192,6 @@ class DataFrameConnec(NtvConnector):
         ''' convert a DataFrame in categorical data (list of dict for each column
         with keys : 'codec', 'name, 'keys' and length of the DataFrame)'''
         return ([SeriesConnec.to_idx(ser) for name, ser in dtf.items()], len(dtf))
-
-    @staticmethod
-    def _unic(srs):
-        ''' return simple value if the Series contains a single value'''
-        return srs[:1] if np.array_equal(srs.values, [srs.values[0]] * len(srs)) else srs
-
-    @staticmethod
-    def decode_ntv_tab(field):
-        '''Generate a tuple data from a Ntv tab value (bytes, string, json, Ntv object)
-
-        *Returns*
-
-        - **tuple** : name, dtype, codec, parent, keys, coef, leng
-            name (None or string): name of the Field
-            dtype (None or string): type of data
-            codec (list): list of Field codec values
-            parent (None or int): Field parent or None
-            keys (None or list): Field keys
-            coef (None or int): coef if primary Field else None
-            leng (int): length of the Field
-        '''
-        ntv = Ntv.obj(field)
-        typ = ntv.type_str if ntv.ntv_type else None
-        nam = ntv.name
-        if isinstance(ntv, NtvSingle):
-            return (nam, typ, [ntv.to_obj(simpleval=True)], None, None, None, 1)
-        val = [ntv_val.to_obj() for ntv_val in ntv]
-        if len(ntv) < 2 or len(ntv) > 3 or isinstance(ntv[0], NtvSingle):
-            return (nam, typ, val, None, None, None, len(ntv))
-
-        ntvc = ntv[0]
-        leng = max(len(ind) for ind in ntv)
-        typc = ntvc.type_str if ntvc.ntv_type else None
-        valc = ntvc.to_obj(simpleval=True)
-        if len(ntv) == 3 and isinstance(ntv[1], NtvSingle) and \
-                isinstance(ntv[1].val, (int, str)) and not isinstance(ntv[2], NtvSingle) and \
-                isinstance(ntv[2][0].val, int):
-            return (nam, typc, valc, ntv[1].val, ntv[2].to_obj(), None, leng)
-        if len(ntv) == 2 and len(ntv[1]) == 1 and isinstance(ntv[1].val, (int, str)):
-            return (nam, typc, valc, ntv[1].val, None, None, leng)
-        if len(ntv) == 2 and len(ntv[1]) == 1 and isinstance(ntv[1].val, list):
-            leng = leng * ntv[1][0].val
-            return (nam, typc, valc, None, None, ntv[1][0].val, leng)
-        if len(ntv) == 2 and len(ntv[1]) > 1 and isinstance(ntv[1][0].val, int):
-            return (nam, typc, valc, None, ntv[1].to_obj(), None, leng)
-        return (nam, typ, val, None, None, None, len(ntv))
 
 
 class SeriesConnec(NtvConnector):
@@ -286,7 +241,7 @@ class SeriesConnec(NtvConnector):
         ntv = Ntv.obj(ntv_value, decode_str=option['decode_str'])
 
         ntv_name, typ, codec, parent, ntv_keys, coef, leng_field = \
-            DataFrameConnec.decode_ntv_tab(ntv)
+            PdUtil.decode_ntv_tab(ntv)
         if parent and not option['extkeys']:
             return None
         if coef:
@@ -320,23 +275,23 @@ class SeriesConnec(NtvConnector):
         ntv_name, name_type = NtvUtil.from_obj_name(sr_name)[:2]
 
         if table:
-            ntv_type = SeriesConnec._ntv_type(name_type, srs.dtype.name)
-            ntv_value = SeriesConnec._table_val(ntv_type, ntv_name, srs)
+            ntv_type = PdUtil.ntv_type(name_type, srs.dtype.name)
+            ntv_value = PdUtil.table_val(ntv_type, ntv_name, srs)
             if no_val:
                 return (ntv_name, ntv_type)
             return (ntv_value, ntv_name, ntv_type)
         if srs.dtype.name == 'category':
             cdc = pd.Series(srs.cat.categories)
-            ntv_type = SeriesConnec._ntv_type(name_type, cdc.dtype.name)
-            cat_value = SeriesConnec._ntv_val(ntv_type, cdc)
+            ntv_type = PdUtil.ntv_type(name_type, cdc.dtype.name)
+            cat_value = PdUtil.ntv_val(ntv_type, cdc)
             cat_value = NtvList(cat_value, ntv_type=ntv_type).to_obj()
             cod_value = list(srs.cat.codes)
             coef = NtvConnector.encode_coef(cod_value)
             ntv_value = [cat_value, [coef] if coef else cod_value]
             ntv_type = 'json'
         else:
-            ntv_type = SeriesConnec._ntv_type(name_type, srs.dtype.name)
-            ntv_value = SeriesConnec._ntv_val(ntv_type, srs)
+            ntv_type = PdUtil.ntv_type(name_type, srs.dtype.name)
+            ntv_value = PdUtil.ntv_val(ntv_type, srs)
         if len(ntv_value) == 1:
             return (NtvSingle(ntv_value[0], ntv_name, ntv_type).to_obj(), name,
                     SeriesConnec.clas_typ if not typ else typ)
@@ -388,12 +343,13 @@ class SeriesConnec(NtvConnector):
         pd_convert = ntv_type in types.index
         
         dtype = types.loc[ntv_type]['dtype'] if pd_convert else 'object'
-        ntv_obj, pd_name, name_type = SeriesConnec._val_nam_typ(
-            ntv_codec, ntv_type, ntv_name, pd_convert, option['annotated'])
-
+        pd_name, name_type = PdUtil.pd_name(ntv_name, ntv_type, pd_convert)
+        obj_type = name_type if pd_convert else ntv_type
+        ntv_obj = PdUtil.ntv_obj(ntv_codec, obj_type, option['annotated'],
+                                        pd_convert)
         if ntv_keys:
             if pd_convert and name_type != 'array':
-                categ = SeriesConnec.read_json(ntv_obj, dtype, ntv_type)
+                categ = SeriesConnec.from_json(ntv_obj, dtype, ntv_type)
                 cat_type = categ.dtype.name
                 categories = categ.astype(astype.get(cat_type, cat_type))
             else:
@@ -405,7 +361,7 @@ class SeriesConnec(NtvConnector):
         else:
             data = ntv_obj * len_unique
             if pd_convert:
-                srs = SeriesConnec.read_json(data, dtype, ntv_type, pd_name)
+                srs = SeriesConnec.from_json(data, dtype, ntv_type, pd_name)
             else:
                 srs = pd.Series(data, name=pd_name, dtype=dtype)
         
@@ -414,74 +370,134 @@ class SeriesConnec(NtvConnector):
         return srs.astype(SeriesConnec.deftype.get(srs.dtype.name, srs.dtype.name))
 
     @staticmethod 
-    def read_json(data, dtype, ntv_type, pd_name=None):
-        '''return a Series from a NTVvalue'''
+    def from_json(data, dtype, ntv_type, pd_name=None):
+        '''return a Series from a NTVvalue and a ntv_type'''
         srs = pd.read_json(json.dumps(data), dtype=dtype,
                            typ='series')
         if not pd_name is None:
             srs = srs.rename(pd_name)
-        if ntv_type == 'date':
-            return pd.to_datetime(srs).dt.date
-        if ntv_type == 'time':
-            return pd.to_datetime(srs).dt.time
-        if ntv_type in ['point', 'polygon', 'line', 'geometry']:
-            return srs.apply(ShapelyConnec.to_geometry)
-        if ntv_type == 'geojson':
-            return srs.apply(ShapelyConnec.from_geojson)
-        return srs
+        return PdUtil.convert(ntv_type, srs, to_json=False)
+
+class PdUtil:
+    '''ntv-pandas utilities.
+    
+    Two static methods are included:
+    
+    - to_listidx: convert a DataFrame in categorical data 
+    - decode_ntv_tab: Generate a tuple data from a NTVvalue
+    '''
 
     @staticmethod
-    def _val_nam_typ(ntv_codec, ntv_type, ntv_name, pd_convert, annotated):
-        ''' return Series data from ntv data
+    def decode_ntv_tab(field):
+        '''Generate a tuple data from a Ntv tab value (bytes, string, json, Ntv object)
 
-        *parameters*
+        *Returns*
 
-        - **ntv_codec**: Ntv object - codec value to convert in Series values
-        - **ntv_type**: string - default type to apply to convert in dtype
-        - **ntv_name**: string - name of the Series
-        - **pd_convert**: boolean - if True, use pandas json conversion
-        - **annotated**: boolean - if True, ntv_codec names are ignored
-
-        *return (tuple)*
-
-        - ntv_obj : list with ntv_codec json values converted to object values
-        - pd_name : string with the Serie name
-        - name_type : string - pandas types to be converted in 'json' Ntv-type
+        - **tuple** : name, dtype, codec, parent, keys, coef, leng
+            name (None or string): name of the Field
+            dtype (None or string): type of data
+            codec (list): list of Field codec values
+            parent (None or int): Field parent or None
+            keys (None or list): Field keys
+            coef (None or int): coef if primary Field else None
+            leng (int): length of the Field
         '''
-        if pd_convert:
-            pd_name, name_type = SeriesConnec._pd_name(ntv_name, ntv_type)
-            if name_type == 'array':
-                ntv_obj = ntv_codec.to_obj(format='obj', simpleval=True)
-            else:
-                ntv_obj = ntv_codec.obj_value(simpleval=annotated, json_array=False,
-                                              def_type=ntv_codec.type_str, fast=True)
-                ntv_obj = ntv_obj if isinstance(ntv_obj, list) else [ntv_obj]
-            return (ntv_obj, pd_name, name_type)
-        ntv_obj = ntv_codec.to_obj(format='obj', simpleval=True, def_type=ntv_type)
-        return (ntv_obj, ntv_name + '::' + ntv_type, ntv_type)
+        ntv = Ntv.obj(field)
+        typ = ntv.type_str if ntv.ntv_type else None
+        nam = ntv.name
+        if isinstance(ntv, NtvSingle):
+            return (nam, typ, [ntv.to_obj(simpleval=True)], None, None, None, 1)
+        val = [ntv_val.to_obj() for ntv_val in ntv]
+        if len(ntv) < 2 or len(ntv) > 3 or isinstance(ntv[0], NtvSingle):
+            return (nam, typ, val, None, None, None, len(ntv))
+
+        ntvc = ntv[0]
+        leng = max(len(ind) for ind in ntv)
+        typc = ntvc.type_str if ntvc.ntv_type else None
+        valc = ntvc.to_obj(simpleval=True)
+        if len(ntv) == 3 and isinstance(ntv[1], NtvSingle) and \
+                isinstance(ntv[1].val, (int, str)) and not isinstance(ntv[2], NtvSingle) and \
+                isinstance(ntv[2][0].val, int):
+            return (nam, typc, valc, ntv[1].val, ntv[2].to_obj(), None, leng)
+        if len(ntv) == 2 and len(ntv[1]) == 1 and isinstance(ntv[1].val, (int, str)):
+            return (nam, typc, valc, ntv[1].val, None, None, leng)
+        if len(ntv) == 2 and len(ntv[1]) == 1 and isinstance(ntv[1].val, list):
+            leng = leng * ntv[1][0].val
+            return (nam, typc, valc, None, None, ntv[1][0].val, leng)
+        if len(ntv) == 2 and len(ntv[1]) > 1 and isinstance(ntv[1][0].val, int):
+            return (nam, typc, valc, None, ntv[1].to_obj(), None, leng)
+        return (nam, typ, val, None, None, None, len(ntv))
 
     @staticmethod 
-    def _pd_name(ntv_name, ntv_type):
-        '''return a tuple with the name of the Series and the type deduced from the name'''
-        types = SeriesConnec.types.set_index('ntv_type')
-        name_type = types.loc[ntv_type]['name_type'] if ntv_type != '' else ''
-        pd_name = ntv_name + '::' + name_type if name_type else ntv_name
-        return (pd_name if pd_name else None, name_type)
-        
+    def name_table(fields):
+        '''return a list of non index field's names in a json Table'''
+        return [field.get('name', None) for field in fields
+                if field.get('name', None) != 'index']
+
+    @staticmethod 
+    def ntvtype_table(fields):
+        '''return a list of non index field's ntv_type in a json Table'''
+        return [PdUtil.ntv_table(field.get('format', 'default'),
+                field.get('type', None)) for field in fields
+                if field.get('name', None) != 'index']
+
+    @staticmethod 
+    def table_schema(schema, name, ntv_type):
+        '''add 'format' and 'type' keys in a Json TableSchema for the field defined by 'name' '''
+        ind = [field['name'] for field in schema['fields']].index(name)
+        types = SeriesConnec.table.set_index('ntv_type')
+        schema['fields'][ind]['format'] = types.loc[ntv_type]['format']
+        schema['fields'][ind]['type'] = types.loc[ntv_type]['type']
+        return schema
+
     @staticmethod
-    def _ntv_table(table_format, table_type):
-        ''' return NTVtype from the TableSchema data.
+    def table_val(ntv_type, ntv_name, srs):
+        ''' convert a Series into TableSchema json-value.
 
         *Parameters*
 
-        - **table_format** : string - TableSchema format,
-        - **table_type** : string - TableSchema type'''
-        return SeriesConnec.table.set_index(['type', 'format']).loc[
-            (table_type, table_format)].values[0]
-    
+        - **ntv_type** : string - NTVtype deduced from the Series name_type and dtype,
+        - **ntv_name**: string - name of the Series
+        - **srs** : Series to be converted.'''
+        srs = PdUtil.convert(ntv_type, srs)
+        srs.name = ntv_name
+        tab_val = json.loads(srs.to_json(orient='table',
+                        date_format='iso', default_handler=str))
+        name = 'values' if srs.name is None else srs.name 
+        tab_val['schema'] = PdUtil.table_schema(tab_val['schema'], name, ntv_type)
+        return tab_val    
+
     @staticmethod
-    def _ntv_type(name_type, dtype):
-        ''' return NTVtype from the Series name_type and dtype.
+    def convert(ntv_type, srs, to_json=True):
+        ''' convert Series with external NTVtype.
+
+        *Parameters*
+
+        - **ntv_type** : string - NTVtype deduced from the Series name_type and dtype,
+        - **srs** : Series to be converted.
+        - **to_json** : boolean (default True) - apply to json function'''
+        if to_json:
+            if ntv_type in ['point', 'line', 'polygon', 'geometry']:
+                return srs.apply(ShapelyConnec.to_coord)
+            if ntv_type == 'geojson':
+                return srs.apply(ShapelyConnec.to_geojson)
+            if ntv_type == 'date':
+                return srs.astype(str)
+            return srs
+        if ntv_type in ['point', 'line', 'polygon', 'geometry']:
+            return srs.apply(ShapelyConnec.to_geometry)
+        if ntv_type == 'geojson':
+            return srs.apply(ShapelyConnec.from_geojson)
+        if ntv_type == 'date':
+            return pd.to_datetime(srs).dt.date
+            #return srs.apply(datetime.date.fromisoformat)
+        if ntv_type == 'time':
+            return pd.to_datetime(srs).dt.time
+        return srs
+
+    @staticmethod
+    def ntv_type(name_type, dtype):
+        ''' return NTVtype from name_type and dtype of a Series .
 
         *Parameters*
 
@@ -495,76 +511,55 @@ class SeriesConnec(NtvConnector):
         return name_type
 
     @staticmethod
-    def _convert(ntv_type, srs):
-        ''' convert Series with external NTVtype.
-
-        *Parameters*
-
-        - **ntv_type** : string - NTVtype deduced from the Series name_type and dtype,
-        - **srs** : Series to be converted.'''
-        if ntv_type in ['point', 'line', 'polygon', 'geometry']:
-            return srs.apply(ShapelyConnec.to_coord)
-        if ntv_type == 'geojson':
-            return srs.apply(ShapelyConnec.to_geojson)
-        if ntv_type == 'date':
-            return srs.astype(str)
-        return srs
-
-    @staticmethod
-    def _ntv_val(ntv_type, srs):
+    def ntv_val(ntv_type, srs):
         ''' convert a simple Series into NTV json-value.
 
         *Parameters*
 
         - **ntv_type** : string - NTVtype deduced from the Series name_type and dtype,
-        - **srs** : Series to be converted.'''
-        srs = SeriesConnec._convert(ntv_type, srs)
+        - **srs** : Series to be *converted.'''
+        srs = PdUtil.convert(ntv_type, srs)
         if ntv_type in ['point', 'line', 'polygon', 'geometry', 'geojson']:
             return srs.to_list()
-        """ 
-        if ntv_type in ['point', 'line', 'polygon', 'geometry']:
-            return srs.apply(ShapelyConnec.to_coord).to_list()
-        if ntv_type == 'geojson':
-            return srs.apply(ShapelyConnec.to_geojson).to_list()
-        if ntv_type == 'date':
-            srs = srs.astype(str)"""
         if srs.dtype.name == 'object':
             return srs.to_list()
         return json.loads(srs.to_json(orient='records',
                         date_format='iso', default_handler=str))
 
+    @staticmethod 
+    def ntv_obj(ntv_codec, name_type, annotated, pd_convert):
+        if pd_convert:
+            if name_type == 'array':
+                return ntv_codec.to_obj(format='obj', simpleval=True)
+            ntv_obj = ntv_codec.obj_value(simpleval=annotated, json_array=False,
+                                          def_type=ntv_codec.type_str, fast=True)
+            return ntv_obj if isinstance(ntv_obj, list) else [ntv_obj]
+        return ntv_codec.to_obj(format='obj', simpleval=True, def_type=name_type)
+
     @staticmethod
-    def _table_val(ntv_type, ntv_name, srs):
-        ''' convert a simple Series into NTV json-value.
+    def ntv_table(table_format, table_type):
+        ''' return NTVtype from the TableSchema data.
 
         *Parameters*
 
-        - **ntv_type** : string - NTVtype deduced from the Series name_type and dtype,
-        - **srs** : Series to be converted.'''
-        srs = SeriesConnec._convert(ntv_type, srs)
-        srs.name = ntv_name
-        table_val = json.loads(srs.to_json(orient='table',
-                        date_format='iso', default_handler=str))
-        name = 'values' if srs.name is None else srs.name 
-        table_val['schema'] = SeriesConnec._table_schema(table_val['schema'], 
-                                                         name, ntv_type)
-        return table_val    
+        - **table_format** : string - TableSchema format,
+        - **table_type** : string - TableSchema type'''
+        return SeriesConnec.table.set_index(['type', 'format']).loc[
+            (table_type, table_format)].values[0]
     
     @staticmethod 
-    def _table_schema(schema, name, ntv_type):
-        ind = [field['name'] for field in schema['fields']].index(name)
-        types = SeriesConnec.table.set_index('ntv_type')
-        schema['fields'][ind]['format'] = types.loc[ntv_type]['format']
-        schema['fields'][ind]['type'] = types.loc[ntv_type]['type']
-        return schema
+    def pd_name(ntv_name, ntv_type, pd_convert=True):
+        '''return a tuple with the name of the Series and the type deduced from the name'''
+        if pd_convert:
+            types = SeriesConnec.types.set_index('ntv_type')
+            name_type = types.loc[ntv_type]['name_type'] if ntv_type != '' else ''
+            pd_name = ntv_name + '::' + name_type if name_type else ntv_name
+            return (pd_name if pd_name else None, name_type)
+        return (ntv_name + '::' + ntv_type, ntv_type)
+        
+    @staticmethod
+    def unic(srs):
+        ''' return simple value if the Series contains a single value'''
+        return srs[:1] if np.array_equal(srs.values, [srs.values[0]] * len(srs)) else srs
 
-    @staticmethod 
-    def _ntvtype_table(fields):
-        return [SeriesConnec._ntv_table(field.get('format', 'default'),
-                field.get('type', None)) for field in fields
-                if field.get('name', None) != 'index']
 
-    @staticmethod 
-    def _name_table(fields):
-        return [field.get('name', None) for field in fields
-                if field.get('name', None) != 'index']
