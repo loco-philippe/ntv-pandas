@@ -48,7 +48,6 @@ def to_json(pd_array, **kwargs):
     ''' 
     option = {'encoded': False, 'header': True, 'table': False} | kwargs
     option['header'] = False if option['table'] else option['header']
-    #print(option['table'])
     if isinstance(pd_array, pd.Series):
         jsn = SeriesConnec.to_json_ntv(pd_array, table=option['table'])[0]
         head = ':field'
@@ -80,7 +79,7 @@ def read_json(js, **kwargs):
               'annotated':False, 'series':False} | kwargs
     jso = json.loads(js) if isinstance(js, str) else js
     if 'schema' in jso:
-        return DataFrameConnec.to_obj_table(jso, **option)
+        return PdUtil.to_obj_table(jso, **option)
     ntv = Ntv.from_obj(jso)
     if ntv.type_str == 'field':
         return SeriesConnec.to_obj_ntv(ntv.ntv_value, **option)
@@ -107,22 +106,6 @@ class DataFrameConnec(NtvConnector):
 
     clas_obj = 'DataFrame'
     clas_typ = 'tab'
-
-    @staticmethod
-    def to_obj_table(jsn, **kwargs):
-        dtype = PdUtil.ntvtype_table(jsn['schema']['fields'])
-        name = PdUtil.name_table(jsn['schema']['fields'])
-        pd_name = [PdUtil.pd_name(nam, dtyp)[0] for nam, dtyp in zip(name, dtype)]
-        dfr = pd.read_json(json.dumps(jsn['data']), orient='record')
-        if 'index' in dfr.columns:
-            dfr = dfr.set_index('index')
-            dfr.index.rename(None, inplace=True)
-        dfr = pd.DataFrame({col: PdUtil.convert(dtype[ind], dfr[col], to_json=False)
-                            for ind, col in enumerate(dfr.columns)})
-        dfr.columns = pd_name 
-        return dfr
-        print(dfr)
-        print(dtype, name, pd_name)
 
     @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):  # reindex=True, decode_str=False):
@@ -201,7 +184,7 @@ class SeriesConnec(NtvConnector):
     
     - to_idx: convert a Series in categorical data 
     - to_series: return a Series from Field data
-    - read_json: return a Series from a NTVvalue
+    - from_json: return a Series from a NTVvalue
     '''
     clas_obj = 'Series'
     clas_typ = 'field'
@@ -381,11 +364,40 @@ class SeriesConnec(NtvConnector):
 class PdUtil:
     '''ntv-pandas utilities.
     
-    Two static methods are included:
+    This class includes static methods:
     
-    - to_listidx: convert a DataFrame in categorical data 
+    Ntv and pandas
     - decode_ntv_tab: Generate a tuple data from a NTVvalue
+    - ntv_type: return NTVtype from name_type and dtype of a Series
+    - convert: convert Series with external NTVtype
+    - ntv_val: convert a simple Series into NTV json-value
+    - ntv_obj: return a list of values to convert in a Series
+    - pd_name: return a tuple with the name of the Series and the type deduced from the name
+    - unic: return simple value if the Series contains a single value
+    
+    TableSchema
+    - to_obj_table: convert json TableSchema data into a DataFrame or a Series
+    - name_table: return a list of non index field's names from a json Table
+    - ntvtype_table: return a list of non index field's ntv_type from a json Table
+    - table_schema: add 'format' and 'type' keys in a Json TableSchema
+    - table_val: convert a Series into TableSchema json-value
+    - ntv_table: return NTVtype from the TableSchema data
+    
     '''
+    @staticmethod
+    def to_obj_table(jsn, **kwargs):
+        ''' convert json TableSchema data into a DataFrame or a Series'''
+        dtype = PdUtil.ntvtype_table(jsn['schema']['fields'])
+        name = PdUtil.name_table(jsn['schema']['fields'])
+        pd_name = [PdUtil.pd_name(nam, dtyp)[0] for nam, dtyp in zip(name, dtype)]
+        dfr = pd.read_json(json.dumps(jsn['data']), orient='record')
+        if 'index' in dfr.columns:
+            dfr = dfr.set_index('index')
+            dfr.index.rename(None, inplace=True)
+        dfr = pd.DataFrame({col: PdUtil.convert(dtype[ind], dfr[col], to_json=False)
+                            for ind, col in enumerate(dfr.columns)})
+        dfr.columns = pd_name 
+        return dfr
 
     @staticmethod
     def decode_ntv_tab(field):
@@ -430,13 +442,13 @@ class PdUtil:
 
     @staticmethod 
     def name_table(fields):
-        '''return a list of non index field's names in a json Table'''
+        '''return a list of non index field's names from a json Table'''
         return [field.get('name', None) for field in fields
                 if field.get('name', None) != 'index']
 
     @staticmethod 
     def ntvtype_table(fields):
-        '''return a list of non index field's ntv_type in a json Table'''
+        '''return a list of non index field's ntv_type from a json Table'''
         return [PdUtil.ntv_table(field.get('format', 'default'),
                 field.get('type', None)) for field in fields
                 if field.get('name', None) != 'index']
@@ -452,7 +464,7 @@ class PdUtil:
 
     @staticmethod
     def table_val(ntv_type, ntv_name, srs):
-        ''' convert a Series into TableSchema json-value.
+        '''convert a Series into TableSchema json-value.
 
         *Parameters*
 
@@ -528,6 +540,7 @@ class PdUtil:
 
     @staticmethod 
     def ntv_obj(ntv_codec, name_type, annotated, pd_convert):
+        '''return a list of values to convert in a Series'''
         if pd_convert:
             if name_type == 'array':
                 return ntv_codec.to_obj(format='obj', simpleval=True)
