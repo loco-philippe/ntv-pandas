@@ -249,12 +249,13 @@ class SeriesConnec(NtvConnector):
     def to_obj_table(jsn, **kwargs):
         dtype = SeriesConnec._ntvtype_table(jsn['schema']['fields'])
         name = SeriesConnec._name_table(jsn['schema']['fields'])
+        pd_name = [SeriesConnec._pd_name(nam, dtyp)[0] for nam, dtyp in zip(name, dtype)]
         dfr = pd.read_json(json.dumps(jsn['data']), orient='record')
         if 'index' in dfr.columns:
             dfr = dfr.set_index('index')
             dfr.index.rename(None, inplace=True)
         print(dfr)
-        print(dtype, name)
+        print(dtype, name, pd_name)
         
     @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):
