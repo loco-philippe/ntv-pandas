@@ -32,6 +32,7 @@ import numpy as np
 
 import ntv_pandas
 from json_ntv.ntv import Ntv, NtvConnector, NtvList, NtvSingle
+from json_ntv.ntv_util import NtvUtil
 from json_ntv.ntv_connector import ShapelyConnec
 
 def to_json(pd_array, **kwargs):
@@ -154,7 +155,7 @@ class DataFrameConnec(NtvConnector):
             jsn = Ntv.obj([SeriesConnec.to_json_ntv(DataFrameConnec._unic(
                            df2[col]))[0] for col in df2.columns]).to_obj()
             return (jsn, name, DataFrameConnec.clas_typ if not typ else typ)
-        df2 = pd.DataFrame({ Ntv.from_obj_name(col)[0]: SeriesConnec._convert(
+        df2 = pd.DataFrame({ NtvUtil.from_obj_name(col)[0]: SeriesConnec._convert(
             SeriesConnec.to_json_ntv(value[col], table=True, no_val=True)[1],
             value[col]) for col in value.columns})
         table_val = json.loads(df2.to_json(orient='table',
@@ -246,10 +247,14 @@ class SeriesConnec(NtvConnector):
 
     @staticmethod
     def to_obj_table(jsn, **kwargs):
-        df = pd.read_json(json.dumps(jsn['data']), orient='record')
         dtype = SeriesConnec._ntvtype_table(jsn['schema']['fields'])
-        print(df)
-        print(dtype)
+        name = SeriesConnec._name_table(jsn['schema']['fields'])
+        dfr = pd.read_json(json.dumps(jsn['data']), orient='record')
+        if 'index' in dfr.columns:
+            dfr = dfr.set_index('index')
+            dfr.index.rename(None, inplace=True)
+        print(dfr)
+        print(dtype, name)
         
     @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):
@@ -337,7 +342,7 @@ class SeriesConnec(NtvConnector):
         no_val = kwargs.get('no_val', False)
         srs = value.astype(SeriesConnec.astype.get(value.dtype.name, value.dtype.name))
         sr_name = srs.name if srs.name else ''
-        ntv_name, name_type = Ntv.from_obj_name(sr_name)[:2]
+        ntv_name, name_type = NtvUtil.from_obj_name(sr_name)[:2]
 
         if table:
             ntv_type = SeriesConnec._ntv_type(name_type, srs.dtype.name)
@@ -468,11 +473,12 @@ class SeriesConnec(NtvConnector):
         - pd_name : string with the Serie name
         - name_type : string - pandas types to be converted in 'json' Ntv-type
         '''
-        types = SeriesConnec.types.set_index('ntv_type')
+        #types = SeriesConnec.types.set_index('ntv_type')
         if pd_convert:
-            name_type = types.loc[ntv_type]['name_type'] if ntv_type != '' else ''
-            pd_name = ntv_name + '::' + name_type if name_type else ntv_name
-            pd_name = pd_name if pd_name else None
+            pd_name, name_type = SeriesConnec._pd_name(ntv_name, ntv_type)
+            #name_type = types.loc[ntv_type]['name_type'] if ntv_type != '' else ''
+            #pd_name = ntv_name + '::' + name_type if name_type else ntv_name
+            #pd_name = pd_name if pd_name else None
             if name_type == 'array':
                 ntv_obj = ntv_codec.to_obj(format='obj', simpleval=True)
             else:
@@ -483,6 +489,14 @@ class SeriesConnec(NtvConnector):
         ntv_obj = ntv_codec.to_obj(format='obj', simpleval=True, def_type=ntv_type)
         return (ntv_obj, ntv_name + '::' + ntv_type, ntv_type)
 
+    @staticmethod 
+    def _pd_name(ntv_name, ntv_type):
+        '''return a tuple with the name of the Series and the type deduced from the name'''
+        types = SeriesConnec.types.set_index('ntv_type')
+        name_type = types.loc[ntv_type]['name_type'] if ntv_type != '' else ''
+        pd_name = ntv_name + '::' + name_type if name_type else ntv_name
+        return (pd_name if pd_name else None, name_type)
+        
     @staticmethod
     def _ntv_table(table_format, table_type):
         ''' return NTVtype from the TableSchema data.
@@ -567,17 +581,17 @@ class SeriesConnec(NtvConnector):
     
     @staticmethod 
     def _table_schema(schema, name, ntv_type):
-        #ntv_name = name if not ntv_name else ntv_name
         ind = [field['name'] for field in schema['fields']].index(name)
         types = SeriesConnec.table.set_index('ntv_type')
         schema['fields'][ind]['format'] = types.loc[ntv_type]['format']
         schema['fields'][ind]['type'] = types.loc[ntv_type]['type']
-        #schema['fields'][ind]['name'] = ntv_name
-        #print(ind, schema['fields'][ind])
         return schema
 
     @staticmethod 
     def _ntvtype_table(fields):
         return [SeriesConnec._ntv_table(field.get('format', 'default'),
-                                        field.get('type', None)) 
-                for field in fields]
+                field.get('type', None)) for field in fields]
+
+    @staticmethod 
+    def _name_table(fields):
+        return [field.get('name', None) for field in fields]
