@@ -93,6 +93,8 @@ class Test_NTV_pandas(unittest.TestCase):
             self.assertEqual(Ntv.obj(sr).to_obj(format='obj').name, sr.name)
             self.assertTrue(npd.as_def_type(sr).equals(npd.read_json(npd.to_json(sr))))
             self.assertEqual(npd.read_json(npd.to_json(sr)).name, sr.name)            
+            self.assertEqual(npd.read_json(npd.to_json(sr, table=True)).name, sr.name)            
+            self.assertTrue(npd.as_def_type(sr).equals(npd.read_json(npd.to_json(sr, table=True))))
 
     def test_json_sfield_full(self):
 
