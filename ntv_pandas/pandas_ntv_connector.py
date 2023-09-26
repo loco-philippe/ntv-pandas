@@ -575,11 +575,9 @@ class PdUtil:
         if pd_convert:
             types = SeriesConnec.types.set_index('ntv_type')
             name_type = types.loc[ntv_type]['name_type'] if ntv_type != '' else ''
-            #dtype = types.loc[ntv_type]['dtype'] if ntv_type != '' else 'object'
             dtype = types.loc[ntv_type]['dtype']
+            dtype = SeriesConnec.deftype.get(dtype, dtype) # ajout
             pd_name = ntv_name + '::' + name_type if name_type else ntv_name
-            #    return (pd_name if pd_name else None, name_type)
-            #return (ntv_name + '::' + ntv_type, ntv_type)
             return (pd_name if pd_name else None, name_type, dtype)
         return (ntv_name + '::' + ntv_type, ntv_type, 'object')
         

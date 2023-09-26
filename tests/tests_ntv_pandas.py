@@ -162,14 +162,14 @@ class Test_table_pandas(unittest.TestCase):
             pd.Series([datetime.datetime(2022, 1, 1), datetime.datetime(2022, 1, 2)],
                        dtype='datetime64[ns]'),
             #pd.Series(pd.to_timedelta(['1D', '2D'])), # read_json pd ko
-            #pd.Series(['az', 'er', 'cd'], dtype='string'), # en cours
+            pd.Series(['az', 'er', 'cd'], dtype='string'), # en cours
             pd.Series([date(2021,1,5), date(2021,1,5), date(2021,1,5)], name='test::date'),
             pd.Series([1,2,3], name='test')
                ]):
             #fields = npd.to_json(srs, table=True)['schema']['fields']
             #rang = [field['name'] for field in fields].index('test')
             #self.assertFalse(fields[rang]['type'] is None)
-            print(ind)
+            #print(ind)
             self.assertTrue(srs.equals(npd.read_json(npd.to_json(srs, table=True))))
 
     def test_dataframe(self):
