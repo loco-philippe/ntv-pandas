@@ -319,17 +319,15 @@ class SeriesConnec(NtvConnector):
                   'annotated': False} | kwargs
         types = SeriesConnec.types.set_index('ntv_type')
         astype = SeriesConnec.astype
+        leng = option['leng']
 
         ntv_type = ntv_codec.type_str
-        len_unique = option['leng'] if len(
-            ntv_codec) == 1 and option['leng'] else 1
+        len_unique = leng if len(ntv_codec) == 1 and leng else 1
         pd_convert = ntv_type in types.index
         
-        dtype = types.loc[ntv_type]['dtype'] if pd_convert else 'object'
-        pd_name, name_type = PdUtil.pd_name(ntv_name, ntv_type, pd_convert)
-        obj_type = name_type if pd_convert else ntv_type
-        ntv_obj = PdUtil.ntv_obj(ntv_codec, obj_type, option['annotated'],
-                                        pd_convert)
+        pd_name, name_type, dtype = PdUtil.pd_name(ntv_name, ntv_type, pd_convert)
+        ntv_obj = PdUtil.ntv_obj(ntv_codec, name_type if pd_convert else ntv_type, 
+                                 option['annotated'], pd_convert)
         if ntv_keys:
             if pd_convert and name_type != 'array':
                 categ = SeriesConnec.from_json(ntv_obj, dtype, ntv_type)
@@ -388,17 +386,22 @@ class PdUtil:
         ''' convert json TableSchema data into a DataFrame or a Series'''
         ntv_type = PdUtil.ntvtype_table(jsn['schema']['fields'])
         name = PdUtil.name_table(jsn['schema']['fields'])
-        pd_name = [PdUtil.pd_name(nam, dtyp)[0] 
-                   for nam, dtyp in zip(name, ntv_type)]
+        pd_name = [PdUtil.pd_name(nam, ntvtyp)[0] 
+                   for nam, ntvtyp in zip(name, ntv_type)]
+        pd_dtype = [PdUtil.pd_name(nam, ntvtyp)[2] 
+                   for nam, ntvtyp in zip(name, ntv_type)]
         dfr = pd.read_json(json.dumps(jsn['data']), orient='record')
         if 'index' in dfr.columns:
             dfr = dfr.set_index('index')
             dfr.index.rename(None, inplace=True)
         dfr = pd.DataFrame({col: PdUtil.convert(ntv_type[ind], dfr[col], 
                         to_json=False) for ind, col in enumerate(dfr.columns)})
+        dfr = dfr.astype({col: pd_dtype[ind] for ind, col in enumerate(dfr.columns)})
         dfr.columns = pd_name 
         if len(dfr.columns) == 1:
             return dfr[dfr.columns[0]]
+        #return srs.astype(SeriesConnec.deftype.get(srs.dtype.name, srs.dtype.name))
+
         return dfr
 
     @staticmethod
@@ -566,14 +569,19 @@ class PdUtil:
     
     @staticmethod 
     def pd_name(ntv_name, ntv_type, pd_convert=True):
-        '''return a tuple with the name of the Series and the type deduced from the name'''
+        '''return a tuple with the name of the Series, the type deduced from 
+        the name and the dtype'''
         ntv_name = '' if ntv_name is None else ntv_name
         if pd_convert:
             types = SeriesConnec.types.set_index('ntv_type')
             name_type = types.loc[ntv_type]['name_type'] if ntv_type != '' else ''
+            #dtype = types.loc[ntv_type]['dtype'] if ntv_type != '' else 'object'
+            dtype = types.loc[ntv_type]['dtype']
             pd_name = ntv_name + '::' + name_type if name_type else ntv_name
-            return (pd_name if pd_name else None, name_type)
-        return (ntv_name + '::' + ntv_type, ntv_type)
+            #    return (pd_name if pd_name else None, name_type)
+            #return (ntv_name + '::' + ntv_type, ntv_type)
+            return (pd_name if pd_name else None, name_type, dtype)
+        return (ntv_name + '::' + ntv_type, ntv_type, 'object')
         
     @staticmethod
     def unic(srs):
