@@ -388,9 +388,9 @@ class PdUtil:
         ''' convert json TableSchema data into a DataFrame or a Series'''
         ntv_type = PdUtil.ntvtype_table(jsn['schema']['fields'])
         name = PdUtil.name_table(jsn['schema']['fields'])
-        pd_name = [PdUtil.pd_name(nam, ntvtyp)[0] 
+        pd_name = [PdUtil.pd_name(nam, ntvtyp, table=True)[0] 
                    for nam, ntvtyp in zip(name, ntv_type)]
-        pd_dtype = [PdUtil.pd_name(nam, ntvtyp)[2] 
+        pd_dtype = [PdUtil.pd_name(nam, ntvtyp, table=True)[2] 
                    for nam, ntvtyp in zip(name, ntv_type)]
         dfr = pd.read_json(json.dumps(jsn['data']), orient='record')
         if 'index' in dfr.columns:
@@ -575,18 +575,23 @@ class PdUtil:
             (table_type, table_format)].values[0]
     
     @staticmethod 
-    def pd_name(ntv_name, ntv_type, pd_convert=True):
+    def pd_name(ntv_name, ntv_type, pd_convert=True, table=False):
         '''return a tuple with the name of the Series, the type deduced from 
         the name and the dtype'''
         ntv_name = '' if ntv_name is None else ntv_name
-        if pd_convert:
-            types = SeriesConnec.types.set_index('ntv_type')
+        typtab = SeriesConnec.typtab.set_index('ntv_type')
+        types = SeriesConnec.types.set_index('ntv_type')
+        if table and ntv_type.lower() in typtab.index:
+            name_type = typtab.loc[ntv_type.lower()]['name_type']
+            dtype = typtab.loc[ntv_type.lower()]['dtype']
+        elif pd_convert or table:
             name_type = types.loc[ntv_type]['name_type'] if ntv_type != '' else ''
             dtype = types.loc[ntv_type]['dtype']
-            dtype = SeriesConnec.deftype.get(dtype, dtype) # ajout
-            pd_name = ntv_name + '::' + name_type if name_type else ntv_name
-            return (pd_name if pd_name else None, name_type, dtype)
-        return (ntv_name + '::' + ntv_type, ntv_type, 'object')
+        else:
+            return (ntv_name + '::' + ntv_type, ntv_type, 'object')
+        dtype = SeriesConnec.deftype.get(dtype, dtype) # ajout
+        pd_name = ntv_name + '::' + name_type if name_type else ntv_name
+        return (pd_name if pd_name else None, name_type, dtype)
         
     @staticmethod
     def unic(srs):

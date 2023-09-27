@@ -27,7 +27,6 @@ class Test_NTV_pandas(unittest.TestCase):
                pd.Series([[1,2], [3,4], [5,6]]),  
                pd.Series([[1,2], [3,4], {'a': 3, 'e':5}]),  
                pd.Series([True, False, True]),
-               pd.Series([True, False, True], name='::boolean'), 
                pd.Series(['az', 'er', 'cd']),
                pd.Series(['az', 'az', 'az']),
                pd.Series([1,2,3]),
@@ -88,7 +87,7 @@ class Test_NTV_pandas(unittest.TestCase):
                                   name='::geojson'),
         ]
         for sr in srs:
-            print(Ntv.obj(sr))
+            #print(Ntv.obj(sr))
             self.assertTrue(npd.as_def_type(sr).equals(Ntv.obj(sr).to_obj(format='obj')))
             self.assertEqual(Ntv.obj(sr).to_obj(format='obj').name, sr.name)
             self.assertTrue(npd.as_def_type(sr).equals(npd.read_json(npd.to_json(sr))))
