@@ -13,7 +13,7 @@ from datetime import date, time
 
 import pandas as pd
 import ntv_pandas as npd
-from shapely.geometry import Point, Polygon
+from shapely.geometry import Point, Polygon, LineString
     
 from json_ntv import Ntv        
 
@@ -75,7 +75,7 @@ class Test_NTV_pandas(unittest.TestCase):
                            Polygon([[1.0, 2.0], [1.0, 30.0], [30.0, 30.0], [30,2]],
                                    [[[5.0, 16.0], [5.0, 27.0], [20.0, 27.0]]])], 
                                    name='::polygon'),
-               pd.Series([Point(1, 0), Point(1, 1), Point(1, 2),
+               pd.Series([Point(1, 0), LineString([[1.0, 2.0], [1.0, 3.0]]),
                           Polygon([[1.0, 2.0], [1.0, 3.0], [2.0, 4.0]]),
                           Polygon([[1.0, 2.0], [1.0, 30.0], [30.0, 30.0], [30,2]],
                                   [[[5.0, 16.0], [5.0, 27.0], [20.0, 27.0]]])], 
