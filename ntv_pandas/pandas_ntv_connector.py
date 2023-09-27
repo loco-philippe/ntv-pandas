@@ -198,6 +198,8 @@ class SeriesConnec(NtvConnector):
     config.read(Path(ntv_pandas.__file__).parent.joinpath('ntv_table.ini'))
     table = pd.DataFrame(json.loads(config['data']['mapping']), 
                          columns=json.loads(config['data']['column']))
+    typtab = pd.DataFrame(json.loads(config['data']['type']), 
+                         columns=json.loads(config['data']['col_type']))
 
     @staticmethod
     def to_obj_ntv(ntv_value, **kwargs):
@@ -258,7 +260,7 @@ class SeriesConnec(NtvConnector):
         ntv_name, name_type = NtvUtil.from_obj_name(sr_name)[:2]
 
         if table:
-            ntv_type = PdUtil.ntv_type(name_type, srs.dtype.name)
+            ntv_type = PdUtil.ntv_type(name_type, srs.dtype.name, table=True)
             ntv_value = PdUtil.table_val(ntv_type, ntv_name, srs)
             if no_val:
                 return (ntv_name, ntv_type)
@@ -400,8 +402,6 @@ class PdUtil:
         dfr.columns = pd_name 
         if len(dfr.columns) == 1:
             return dfr[dfr.columns[0]]
-        #return srs.astype(SeriesConnec.deftype.get(srs.dtype.name, srs.dtype.name))
-
         return dfr
 
     @staticmethod
@@ -463,9 +463,13 @@ class PdUtil:
     def table_schema(schema, name, ntv_type):
         '''add 'format' and 'type' keys in a Json TableSchema for the field defined by 'name' '''
         ind = [field['name'] for field in schema['fields']].index(name)
-        types = SeriesConnec.table.set_index('ntv_type')
-        schema['fields'][ind]['format'] = types.loc[ntv_type]['format']
-        schema['fields'][ind]['type'] = types.loc[ntv_type]['type']
+        tabletype = SeriesConnec.table.set_index('ntv_type').loc[ntv_type]
+        if tabletype['format'] == 'default':
+            schema['fields'][ind].pop('format', None)        
+        else:    
+            schema['fields'][ind]['format'] = tabletype['format']
+        schema['fields'][ind]['type'] = tabletype['type']
+        schema['fields'][ind].pop('extDtype', None)        
         return schema
 
     @staticmethod
@@ -515,7 +519,7 @@ class PdUtil:
         return srs
 
     @staticmethod
-    def ntv_type(name_type, dtype):
+    def ntv_type(name_type, dtype, table=False):
         ''' return NTVtype from name_type and dtype of a Series .
 
         *Parameters*
@@ -526,7 +530,10 @@ class PdUtil:
             types_none = SeriesConnec.types.set_index('name_type').loc[None]
             if dtype in types_none.dtype.values:
                 return types_none.set_index('dtype').loc[dtype].ntv_type
-            return 'json'
+            if not table:
+                return 'json'
+            typtab = SeriesConnec.typtab.set_index('name_type').loc[None]
+            return typtab.set_index('dtype').loc[dtype.lower()].ntv_type            
         return name_type
 
     @staticmethod
