@@ -9,14 +9,15 @@ The `NTV.test_ntv` module contains the unit tests (class unittest) for the
 """
 import unittest
 import datetime
+from datetime import date, time
 
 import pandas as pd
 import ntv_pandas as npd
-from shapely.geometry import Point, Polygon
+from shapely.geometry import Point, Polygon, LineString
     
 from json_ntv import Ntv        
 
-class Test_Pandas_Connector(unittest.TestCase):
+class Test_NTV_pandas(unittest.TestCase):
     
     def test_series(self):
         
@@ -70,7 +71,12 @@ class Test_Pandas_Connector(unittest.TestCase):
 
                # with ntv_type unknown in pandas and NTV conversion
                pd.Series([Point(1, 0), Point(1, 1), Point(1, 2)], name='::point'),
-               pd.Series([Point(1, 0), Point(1, 1), Point(1, 2),
+                #pd.Series([Polygon(), Polygon([[1.0, 2.0], [1.0, 3.0], [2.0, 4.0]]),
+                pd.Series([Polygon([[1.0, 2.0], [1.0, 3.0], [2.0, 4.0]]),
+                           Polygon([[1.0, 2.0], [1.0, 30.0], [30.0, 30.0], [30,2]],
+                                   [[[5.0, 16.0], [5.0, 27.0], [20.0, 27.0]]])], 
+                                   name='::polygon'),
+               pd.Series([Point(1, 0), LineString([[1.0, 2.0], [1.0, 3.0]]),
                           Polygon([[1.0, 2.0], [1.0, 3.0], [2.0, 4.0]]),
                           Polygon([[1.0, 2.0], [1.0, 30.0], [30.0, 30.0], [30,2]],
                                   [[[5.0, 16.0], [5.0, 27.0], [20.0, 27.0]]])], 
@@ -87,6 +93,8 @@ class Test_Pandas_Connector(unittest.TestCase):
             self.assertEqual(Ntv.obj(sr).to_obj(format='obj').name, sr.name)
             self.assertTrue(npd.as_def_type(sr).equals(npd.read_json(npd.to_json(sr))))
             self.assertEqual(npd.read_json(npd.to_json(sr)).name, sr.name)            
+            self.assertEqual(npd.read_json(npd.to_json(sr, table=True)).name, sr.name)            
+            self.assertTrue(npd.as_def_type(sr).equals(npd.read_json(npd.to_json(sr, table=True))))
 
     def test_json_sfield_full(self):
 
@@ -136,9 +144,18 @@ class Test_Pandas_Connector(unittest.TestCase):
             self.assertEqual(Ntv.obj(ntv.to_obj(format='obj')), ntv)            
             self.assertEqual(npd.to_json(npd.read_json(ntv)), ntv.to_obj())            
 
-
-
-        
+class Test_table_pandas(unittest.TestCase):
+    
+    def test_dataframe(self):
+        for df in [
+            pd.DataFrame({'test::date': pd.Series([date(2021,1,5), date(2021,1,5)
+                        , date(2021,1,5)]), 'entiers': pd.Series([1,2,3])}),
+            
+               ]:
+            fields = npd.to_json(df, table=True)['schema']['fields']
+            rang = [field['name'] for field in fields].index('test')
+            self.assertFalse(fields[rang]['type'] is None)
+            self.assertTrue(df.equals(npd.read_json(npd.to_json(df, table=True))))
 if __name__ == '__main__':
     
     unittest.main(verbosity=2)
