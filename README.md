@@ -73,9 +73,8 @@ Out[5]: {':tab': {'index': [100, 200, 300, 400, 500],
 *Reversibility*
 
 ```python
-In [6]: df_from_json = npd.read_json(df_to_json)
-        print('df created from JSON is equal to initial df ? ', df_from_json.equals(df))
-Out[6]: df created from JSON is equal to initial df ?  True
+In [6]: print(npd.read_json(df_to_json).equals(df))
+Out[6]: True
 ```
 
 *Table Schema representation*
