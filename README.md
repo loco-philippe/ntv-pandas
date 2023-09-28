@@ -128,7 +128,7 @@ dependency:
 # roadmap
 
 - **type extension** : interval dtype and sparse format not yet included
-- **table schema** : add type / format (`geojson`/`topojson`, `geopoint`/`default`, `geopoint`/`object`, `duration`/`default, `string`/`binary`, `string`/`uuid`), 
+- **table schema** : add type / format (`geojson`/`topojson`, `geopoint`/`default`, `geopoint`/`object`, `duration`/`default`, `string`/`binary`, `string`/`uuid`), 
 - **null JSON data** : strategy to define
 - **multidimensional** : extension of the NTV format for multidimensional data (e.g. Xarray)   
 - **pandas type** : support for Series or DataFrame which include pandas data
