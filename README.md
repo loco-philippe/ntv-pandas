@@ -35,11 +35,11 @@ In [1]: from shapely.geometry import Point
         import ntv_pandas as npd
 
 In [2]: data = {'index':           [100, 200, 300, 400, 500, 600],
-                'dates::date':     pd.Series([date(1964,1,1), date(1985,2,5), date(2022,1,21), date(1964,1,1), date(1985,2,5), date(2022,1,21)]),
+                'dates::date':     [date(1964,1,1), date(1985,2,5), date(2022,1,21), date(1964,1,1), date(1985,2,5), date(2022,1,21)],
                 'value':           [10, 10, 20, 20, 30, 30],
-                'value32':         pd.Series([12, 12, 22, 22, 32, 32], dtype='int32'),
+                'value32':         [12, 12, 22, 22, 32, 32], dtype='int32'),
                 'res':             [10, 20, 30, 10, 20, 30],
-                'coord::point':    pd.Series([Point(1,2), Point(3,4), Point(5,6), Point(7,8), Point(3,4), Point(5,6)]),
+                'coord::point':    [Point(1,2), Point(3,4), Point(5,6), Point(7,8), Point(3,4), Point(5,6)],
                 'names':           pd.Series(['john', 'eric', 'judith', 'mila', 'hector', 'maria'], dtype='string'),
                 'unique':          True }
 
