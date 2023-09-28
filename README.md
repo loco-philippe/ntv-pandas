@@ -59,7 +59,7 @@ Out[4]:       dates::date  value  value32  res coord::point   names  unique
 
 ```python
 In [5]: df_to_json = npd.to_json(df)
-        pprint(df_to_json, compact=True, width=120)
+        pprint(df_to_json, compact=True, width=120, sort_dicts=False)
 Out[5]: {':tab': {'index': [100, 200, 300, 400, 500],
                   'dates::date': ['1964-01-01', '1985-02-05', '2022-01-21', '1964-01-01', '1985-02-05'],
                   'value': [10, 10, 20, 20, 30],
