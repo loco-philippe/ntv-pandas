@@ -134,10 +134,7 @@ class DataFrameConnec(NtvConnector):
                               None if no_keys[ind] else lidx[ind][4], **option)
                        for ind in range(len(lidx))]
         dfr = pd.DataFrame({ser.name: ser for ser in list_series})
-        if 'index' in dfr.columns:
-            dfr = dfr.set_index('index')
-            dfr.index.rename(None, inplace=True)
-        return dfr
+        return PdUtil.pd_index(dfr)
 
     @staticmethod
     def to_json_ntv(value, name=None, typ=None, **kwargs):
@@ -151,6 +148,7 @@ class DataFrameConnec(NtvConnector):
         - **table** : boolean (default False) - if True return TableSchema format'''
 
         table = kwargs.get('table', False)
+        #df2 = value.reset_index()
         if not table:
             df2 = value.reset_index()
             jsn = Ntv.obj([SeriesConnec.to_json_ntv(PdUtil.unic(df2[col]))[0]
@@ -159,6 +157,9 @@ class DataFrameConnec(NtvConnector):
         df2 = pd.DataFrame({ NtvUtil.from_obj_name(col)[0]: PdUtil.convert(
             SeriesConnec.to_json_ntv(value[col], table=True, no_val=True)[1],
             value[col]) for col in value.columns})
+        '''df2 = pd.DataFrame({ NtvUtil.from_obj_name(col)[0]: PdUtil.convert(
+            SeriesConnec.to_json_ntv(df2[col], table=True, no_val=True)[1],
+            df2[col]) for col in df2.columns})'''
         table_val = json.loads(df2.to_json(orient='table',
                         date_format='iso', default_handler=str))
         #print(table_val)
@@ -373,6 +374,7 @@ class PdUtil:
     - ntv_val: convert a simple Series into NTV json-value
     - ntv_obj: return a list of values to convert in a Series
     - pd_name: return a tuple with the name of the Series and the type deduced from the name
+    - pd_index: return a DataFrame with index
     - unic: return simple value if the Series contains a single value
     
     TableSchema
@@ -393,13 +395,12 @@ class PdUtil:
         pd_dtype = [PdUtil.pd_name(nam, ntvtyp, table=True)[2] 
                    for nam, ntvtyp in zip(name, ntv_type)]
         dfr = pd.read_json(json.dumps(jsn['data']), orient='record')
-        if 'index' in dfr.columns:
-            dfr = dfr.set_index('index')
-            dfr.index.rename(None, inplace=True)
+        dfr = PdUtil.pd_index(dfr)
         dfr = pd.DataFrame({col: PdUtil.convert(ntv_type[ind], dfr[col], 
                         to_json=False) for ind, col in enumerate(dfr.columns)})
         dfr = dfr.astype({col: pd_dtype[ind] for ind, col in enumerate(dfr.columns)})
         dfr.columns = pd_name 
+        #dfr = PdUtil.pd_index(dfr)
         if len(dfr.columns) == 1:
             return dfr[dfr.columns[0]]
         return dfr
@@ -573,6 +574,14 @@ class PdUtil:
         - **table_type** : string - TableSchema type'''
         return SeriesConnec.table.set_index(['type', 'format']).loc[
             (table_type, table_format)].values[0]
+
+    @staticmethod
+    def pd_index(dfr):
+        '''return a DataFrame with index'''
+        if 'index' in dfr.columns:
+            dfr = dfr.set_index('index')
+            dfr.index.rename(None, inplace=True)
+        return dfr
     
     @staticmethod 
     def pd_name(ntv_name, ntv_type, pd_convert=True, table=False):
