@@ -22,6 +22,7 @@ It contains :
     - `DataFrameConnec`: 'tab'   connector
     - `SeriesConnec`:    'field' connector
     
+- an utility class with static methods : `PdUtil`    
 """
 import datetime
 import json
