@@ -168,8 +168,12 @@ class DataFrameConnec(NtvConnector):
           
     @staticmethod
     def to_listidx(dtf):
-        ''' convert a DataFrame in categorical data (list of dict for each column
-        with keys : 'codec', 'name, 'keys' and length of the DataFrame)'''
+        ''' convert a DataFrame in categorical data 
+        
+        *Return: tuple with:*
+
+        - **list** of dict (keys : 'codec', 'name, 'keys') for each column
+        - **lenght** of the DataFrame'''
         return ([SeriesConnec.to_idx(ser) for name, ser in dtf.items()], len(dtf))
 
 
@@ -284,9 +288,9 @@ class SeriesConnec(NtvConnector):
 
         *return (dict)*
 
-        { 'codec': <list of pandas categories>,
-          'name': <name of the series>,
-          'keys': <list of pandas codes> }
+        { 'codec': 'list of pandas categories',
+          'name': 'name of the series',
+          'keys': 'list of pandas codes' }
         '''
         idx = ser.astype('category')
         lis = list(idx.cat.categories)
