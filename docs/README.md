@@ -5,4 +5,5 @@
 - Python Connectors documentation
   - [dev](https://loco-philippe.github.io/ntv-pandas/ntv_pandas.html)
   - [v0.1.1](https://loco-philippe.github.io/ntv-pandas/v0.1.1/ntv_pandas.html)
-- [Release](./release)
+  - [v1.0.0](https://loco-philippe.github.io/ntv-pandas/v1.0.0/ntv_pandas.html)
+- [Release](./release.rst)

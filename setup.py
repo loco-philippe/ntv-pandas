@@ -13,7 +13,7 @@ long_description = (here / "README.md").read_text(encoding="utf-8")
 
 setup(
     name="ntv_pandas",
-    version="0.1.1",
+    version="1.0.0",
     description="NTV-pandas : A semantic, compact and reversible JSON-pandas converter",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -21,7 +21,7 @@ setup(
     author="Philippe Thomy",
     author_email="philippe@loco-labs.io",
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "Topic :: Software Development :: Build Tools",
         "License :: OSI Approved :: MIT License",
@@ -30,5 +30,5 @@ setup(
     packages=find_packages(include=['ntv_pandas', 'ntv_pandas.*']),
     package_data={'ntv_pandas': ['*.ini']},
     python_requires=">=3.9, <4",
-    install_requires=['numpy', 'pandas', 'shapely']
+    install_requires=['json_ntv', 'numpy', 'pandas', 'shapely']
 )
