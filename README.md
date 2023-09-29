@@ -4,9 +4,9 @@
 
 # Why a NTV-pandas converter ?
 pandas provide JSON converter but three limitations are present:
-- the JSON-pandas converter take into account a few data types,
+- the JSON-pandas converter take into account few data types,
 - the JSON-pandas converter is not always reversible (conversion round trip)
-- external dtype (e.g. TableSchema type) are not included
+- external data types (e.g. TableSchema types) are not included
 
 # main features
 The NTV-pandas converter uses the [semantic NTV format](https://loco-philippe.github.io/ES/JSON%20semantic%20format%20(JSON-NTV).htm) 
@@ -21,11 +21,11 @@ NTV-pandas was developped originally in the [json-NTV project](https://github.co
 
 # example
 
-In the example below, a DataFrame with several data types is converted to JSON (with NTV format and with Table Schema format).
+In the example below, a DataFrame with multiple data types is converted to JSON (first to NTV format and then to Table Schema format).
 
-The DataFrame resulting from those JSON conversions are identical to the initial DataFrame (reversibility).
+The DataFrame resulting from these JSON conversions are identical to the initial DataFrame (reversibility).
 
-With the existing JSON interface, those conversions are not possible.
+With the existing JSON interface, these conversions are not possible.
 
 *data example*
 ```python
