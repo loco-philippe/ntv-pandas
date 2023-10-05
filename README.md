@@ -2,13 +2,15 @@
 
 <img src="https://loco-philippe.github.io/ES/ntv_pandas.png" alt="ntv-pandas" align="middle" style="height:80px;">
 
+For more information, see the [user guide](https://loco-philippe.github.io/ntv-pandas/docs/user_guide.html) or the [github repository](https://github.com/loco-philippe/ntv-pandas).
+
 # Why a NTV-pandas converter ?
 pandas provide JSON converter but three limitations are present:
 - the JSON-pandas converter take into account few data types,
 - the JSON-pandas converter is not always reversible (conversion round trip)
 - external data types (e.g. TableSchema types) are not included
 
-# main features
+## main features
 The NTV-pandas converter uses the [semantic NTV format](https://loco-philippe.github.io/ES/JSON%20semantic%20format%20(JSON-NTV).htm) 
 to include a large set of data types in a JSON representation.    
     
@@ -19,7 +21,7 @@ The converter integrates:
 
 NTV-pandas was developped originally in the [json-NTV project](https://github.com/loco-philippe/NTV)
 
-# example
+## example
 
 In the example below, a DataFrame with multiple data types is converted to JSON (first to NTV format and then to Table Schema format).
 
@@ -110,26 +112,3 @@ Out[8]: {'fields': [{'name': 'index', 'type': 'integer'},
 In [9]: print(npd.read_json(df_to_table).equals(df))
 Out[9]: True
 ```
-# installation and documentation
-
-`ntv-pandas` itself is a pure Python package maintained on [ntv-pandas github repository](https://github.com/loco-philippe/ntv-pandas).     
-     
-It can be installed with `pip`. 
-
-    pip install ntv-pandas
-
-dependency:
-- `json_ntv`: support the NTV format,
-- `shapely`: for the location data,
-- `pandas` 
-
-[Documentation](https://github.com/loco-philippe/ntv-pandas/tree/main/docs/README.md)
-
-# roadmap
-
-- **type extension** : interval dtype and sparse format not yet included
-- **table schema** : add type / format (`geojson`/`topojson`, `geopoint`/`default`, `geopoint`/`object`, `duration`/`default`, `string`/`binary`, `string`/`uuid`), 
-- **null JSON data** : strategy to define
-- **multidimensional** : extension of the NTV format for multidimensional data (e.g. Xarray)   
-- **pandas type** : support for Series or DataFrame which include pandas data
-- **data consistency** : controls between NTVtype and NTVvalue

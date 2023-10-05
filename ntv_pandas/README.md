@@ -13,7 +13,14 @@ The `ntv_pandas` package includes
     - `ntv_table.ini` (correspondence between ntv_type and Table Schema types)
 
 ## Installation
-`ntv_pandas` itself is a pure Python package. It can be installed with pip 
+`ntv_pandas` itself is a pure Python package. maintained on [ntv-pandas github repository](https://github.com/loco-philippe/ntv-pandas).     
+     
+It can be installed with `pip`. 
 
     pip install ntv_pandas
     
+dependency:
+- `json_ntv`: support the NTV format,
+- `shapely`: for the location data,
+- `pandas` 
+
