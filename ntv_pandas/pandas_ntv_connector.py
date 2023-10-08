@@ -24,6 +24,7 @@ It contains :
     
 - an utility class with static methods : `PdUtil`    
 """
+import os
 import datetime
 import json
 import configparser
@@ -31,10 +32,12 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 
-import ntv_pandas
+
 from json_ntv.ntv import Ntv, NtvConnector, NtvList, NtvSingle
 from json_ntv.ntv_util import NtvUtil
 from json_ntv.ntv_connector import ShapelyConnec
+
+path_ntv_pandas = Path(os.path.abspath(__file__)).parent
 
 def to_json(pd_array, **kwargs):
     ''' convert pandas Series or Dataframe to JSON text or JSON Value.
@@ -188,13 +191,15 @@ class SeriesConnec(NtvConnector):
     clas_obj = 'Series'
     clas_typ = 'field'
     config = configparser.ConfigParser()
-    config.read(Path(ntv_pandas.__file__).parent.joinpath('ntv_pandas.ini'))
+    #config.read(Path(ntv_pandas.__file__).parent.joinpath('ntv_pandas.ini'))
+    config.read(path_ntv_pandas.joinpath('ntv_pandas.ini'))
     types = pd.DataFrame(json.loads(config['data']['type']), 
                          columns=json.loads(config['data']['column']))
     astype = json.loads(config['data']['astype'])
     deftype = {val: key for key, val in astype.items()}
     config = configparser.ConfigParser()
-    config.read(Path(ntv_pandas.__file__).parent.joinpath('ntv_table.ini'))
+    #config.read(Path(ntv_pandas.__file__).parent.joinpath('ntv_table.ini'))
+    config.read(path_ntv_pandas.joinpath('ntv_table.ini'))
     table = pd.DataFrame(json.loads(config['data']['mapping']), 
                          columns=json.loads(config['data']['column']))
     typtab = pd.DataFrame(json.loads(config['data']['type']), 
@@ -614,12 +619,3 @@ class PdUtil:
     def unic(srs):
         ''' return simple value if the Series contains a single value'''
         return srs[:1] if np.array_equal(srs.values, [srs.values[0]] * len(srs)) else srs
-
-# voir gurobipy-pandas: https://github.com/Gurobi/gurobipy-pandas/blob/main/src/gurobipy_pandas/accessors.py
-@pd.api.extensions.register_dataframe_accessor("npd")
-class NpdAccessor:
-    def __init__(self, pandas_obj):
-        self._obj = pandas_obj
-
-    def to_json(self, **kwargs):
-        return ntv_pandas.to_json(self._obj, **kwargs)
