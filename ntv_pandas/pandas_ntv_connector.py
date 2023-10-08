@@ -615,4 +615,11 @@ class PdUtil:
         ''' return simple value if the Series contains a single value'''
         return srs[:1] if np.array_equal(srs.values, [srs.values[0]] * len(srs)) else srs
 
+# voir gurobipy-pandas: https://github.com/Gurobi/gurobipy-pandas/blob/main/src/gurobipy_pandas/accessors.py
+@pd.api.extensions.register_dataframe_accessor("npd")
+class NpdAccessor:
+    def __init__(self, pandas_obj):
+        self._obj = pandas_obj
 
+    def to_json(self, **kwargs):
+        return ntv_pandas.to_json(self._obj, **kwargs)
