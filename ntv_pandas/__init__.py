@@ -25,7 +25,8 @@ This package contains the following classes and functions:
     
 """
 #from pathlib import Path
-from ntv_pandas.pandas_ntv_connector import DataFrameConnec, SeriesConnec, read_json, to_json, as_def_type
+from ntv_pandas.pandas_ntv_connector import DataFrameConnec, SeriesConnec, read_json
+from ntv_pandas.pandas_ntv_connector import to_json, as_def_type, equals
 import ntv_pandas.accessors
 #import ntv_pandas.pandas_ntv_connector
 

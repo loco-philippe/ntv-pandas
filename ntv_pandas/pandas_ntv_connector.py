@@ -95,10 +95,26 @@ def read_json(js, **kwargs):
 
 def as_def_type(pd_array):
     '''convert a Series or DataFrame with default dtype'''
-    if isinstance(pd_array, pd.Series):
+    if isinstance(pd_array, (pd.Series, pd.Index)):
         return pd_array.astype(SeriesConnec.deftype.get(pd_array.dtype.name, pd_array.dtype.name))
     return pd.DataFrame({col: as_def_type(pd_array[col]) for col in pd_array.columns})
-        
+
+def equals(pdself, pdother):
+    equ = True
+    if isinstance(pdself, pd.Series) and isinstance(pdother, pd.Series):
+        type_cat = str(pdself.dtype) ==  str(pdother.dtype) == 'category'
+        if type_cat:
+            equ &= equals(pdself.cat.categories, pdother.cat.categories)
+        else:    
+            equ &= as_def_type(pdself).equals(as_def_type(pdother))
+        equ &= pdself.name == pdother.name
+        if not equ:
+            return False
+    elif isinstance(pdself, pd.DataFrame) and isinstance(pdother, pd.DataFrame):
+        for cself, cother in zip(pdself, pdother): 
+            equ &= equals(pdself[cself], pdother[cother])
+    return equ            
+            
 class DataFrameConnec(NtvConnector):
     
     '''NTV connector for pandas DataFrame.
@@ -129,14 +145,12 @@ class DataFrameConnec(NtvConnector):
         option = kwargs | {'leng': leng}
         no_keys = []
         for ind in range(len(lidx)):
-            no_keys.append(not lidx[ind][3]
-                           and not lidx[ind][4] and not lidx[ind][5])
+            lind = lidx[ind]
+            no_keys.append(not lind[3] and not lind[4] and not lind[5])
             NtvConnector.init_ntv_keys(ind, lidx, leng)
-            lidx[ind][2] = Ntv.fast(Ntv.obj_ntv(lidx[ind][2], typ=lidx[ind][1],
-                                                single=len(lidx[ind][2]) == 1))
-        list_series = [series(lidx[ind][2], lidx[ind][0],
-                              None if no_keys[ind] else lidx[ind][4], **option)
-                       for ind in range(len(lidx))]
+            lind[2] = Ntv.fast(Ntv.obj_ntv(lind[2], typ=lind[1], single=len(lind[2]) == 1))
+        list_series = [series(lidx[ind][2], lidx[ind][0], None if no_keys[ind] 
+                              else lidx[ind][4], **option) for ind in range(len(lidx))]
         dfr = pd.DataFrame({ser.name: ser for ser in list_series})
         return PdUtil.pd_index(dfr)
 
@@ -449,7 +463,7 @@ class PdUtil:
             return (nam, typc, valc, ntv[1].val, ntv[2].to_obj(), None, leng)
         if len(ntv) == 2 and len(ntv[1]) == 1 and isinstance(ntv[1].val, (int, str)):
             return (nam, typc, valc, ntv[1].val, None, None, leng)
-        if len(ntv) == 2 and len(ntv[1]) == 1 and isinstance(ntv[1].val, list):
+        if len(ntv) == 2 and len(ntv[1]) == 1 and isinstance(ntv[1].val, list) and len(ntv[0]) > 1:
             leng = leng * ntv[1][0].val
             return (nam, typc, valc, None, None, ntv[1][0].val, leng)
         if len(ntv) == 2 and len(ntv[1]) > 1 and isinstance(ntv[1][0].val, int):

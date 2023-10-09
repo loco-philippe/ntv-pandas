@@ -8,7 +8,7 @@ Created on Sun Oct 8 2023
 Accessor methods bound to pd.Series.npd, pd.DataFrame.npd
 """
 import pandas as pd
-from pandas_ntv_connector import to_json, as_def_type
+from pandas_ntv_connector import to_json, as_def_type, equals
 
 try:
     # delete the accessor to avoid warning
@@ -34,6 +34,10 @@ class NpdDataFrameAccessor:
         `pd.DataFrame.npd.as_def_type`"""
         return as_def_type(self._obj)
 
+    def equals(self, other):
+        """Accessor for method `pandas_ntv_connector.equals` invoked as
+        `pd.DataFrame.npd.equals`"""
+        return equals(self._obj, other)
 
 try:
     # delete the accessor to avoid warning
@@ -58,3 +62,8 @@ class NpdSeriesAccessor:
         """Accessor for method `pandas_ntv_connector.as_def_type` invoked as
         `pd.Series.npd.as_def_type`"""
         return as_def_type(self._obj)
+
+    def equals(self, other):
+        """Accessor for method `pandas_ntv_connector.equals` invoked as
+        `pd.DataFrame.npd.equals`"""
+        return equals(self._obj, other)
