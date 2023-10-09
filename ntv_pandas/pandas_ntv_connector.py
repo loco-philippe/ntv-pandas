@@ -348,7 +348,7 @@ class SeriesConnec(NtvConnector):
         pd_name, name_type, dtype = PdUtil.pd_name(ntv_name, ntv_type, pd_convert)
         ntv_obj = PdUtil.ntv_obj(ntv_codec, name_type if pd_convert else ntv_type, 
                                  option['annotated'], pd_convert)
-        if ntv_keys:
+        if ntv_keys:          
             if pd_convert and name_type != 'array':
                 categ = SeriesConnec._from_json(ntv_obj, dtype, ntv_type)
                 cat_type = categ.dtype.name
@@ -356,7 +356,8 @@ class SeriesConnec(NtvConnector):
             else:
                 categories = pd.Series(ntv_obj, dtype='object')
             cat = pd.CategoricalDtype(categories=categories)
-            data = pd.Categorical.from_codes(codes=ntv_keys, dtype=cat)
+            #data = pd.Categorical.from_codes(codes=ntv_keys, dtype=cat)
+            data = pd.Categorical.from_codes(codes=ntv_keys * len_unique, dtype=cat)
             srs = pd.Series(data, name=pd_name,
                             index=option['index'], dtype='category')
         else:
@@ -466,8 +467,11 @@ class PdUtil:
         if len(ntv) == 2 and len(ntv[1]) == 1 and isinstance(ntv[1].val, list) and len(ntv[0]) > 1:
             leng = leng * ntv[1][0].val
             return (nam, typc, valc, None, None, ntv[1][0].val, leng)
-        if len(ntv) == 2 and len(ntv[1]) > 1 and isinstance(ntv[1][0].val, int):
+        #if len(ntv) == 2 and len(ntv[1]) > 1 and isinstance(ntv[1][0].val, int):
+        if len(ntv) == 2 and len(ntv[1]) > 0 and isinstance(ntv[1][0].val, int):
             return (nam, typc, valc, None, ntv[1].to_obj(), None, leng)
+        #if len(ntv) == 2 and len(ntv[1]) == 1 and len(ntv[0]) == 1:
+        #    return (nam, typc, valc, None, None, None, leng)
         return (nam, typ, val, None, None, None, len(ntv))
 
     @staticmethod 
