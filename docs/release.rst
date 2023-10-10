@@ -1,5 +1,12 @@
-Version 0.x
-===========
+Version x.y.z
+=============
+
+1.0.1 (2023-10-10)
+--------------------
+- add User Guide
+- add `equals` method (check names and cat.categories dtype)
+- add pandas accessor for `to_json`, `equals` and `as_def_type`
+- BUG #3: categorical with a single value
 
 1.0.0 (2023-09-30)
 --------------------
