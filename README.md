@@ -4,6 +4,8 @@
 
 For more information, see the [user guide](https://loco-philippe.github.io/ntv-pandas/docs/user_guide.html) or the [github repository](https://github.com/loco-philippe/ntv-pandas).
 
+NTV-pandas is referenced in the [pandas ecosystem](https://pandas.pydata.org/community/ecosystem.html).
+
 # Why a NTV-pandas converter ?
 
 pandas provide JSON converter but three limitations are present:
