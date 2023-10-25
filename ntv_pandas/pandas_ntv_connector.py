@@ -145,7 +145,7 @@ class DataFrameConnec(NtvConnector):
         series = SeriesConnec.to_series
 
         ntv = Ntv.fast(ntv_value)
-        lidx = [list(PdUtil.decode_ntv_tab(ntvf))
+        lidx = [list(NtvUtil.decode_ntv_tab(ntvf, PdUtil.decode_ntv_to_val))
                 for ntvf in ntv]
         leng = max([idx[6] for idx in lidx])
         option = kwargs | {'leng': leng}
@@ -251,7 +251,7 @@ class SeriesConnec(NtvConnector):
         ntv = Ntv.obj(ntv_value, decode_str=option['decode_str'])
 
         ntv_name, typ, codec, parent, ntv_keys, coef, leng_field = \
-            PdUtil.decode_ntv_tab(ntv)
+            NtvUtil.decode_ntv_tab(ntv, PdUtil.decode_ntv_to_val)
         if parent and not option['extkeys']:
             return None
         if coef:
@@ -403,7 +403,6 @@ class PdUtil:
     This class includes static methods:
 
     Ntv and pandas
-    - **decode_ntv_tab**: Generate a tuple data from a NTVvalue
     - **ntv_type**: return NTVtype from name_type and dtype of a Series
     - **convert**: convert Series with external NTVtype
     - **ntv_val**: convert a simple Series into NTV json-value
@@ -439,46 +438,13 @@ class PdUtil:
         if len(dfr.columns) == 1:
             return dfr[dfr.columns[0]]
         return dfr
-
-    @staticmethod
-    def decode_ntv_tab(field):
-        '''Generate a tuple data from a Ntv tab value (bytes, string, json, Ntv object)
-
-        *Returns tuple: (name, dtype, codec, parent, keys, coef, leng)*
-
-        - name (None or string): name of the Field
-        - dtype (None or string): type of data
-        - codec (list): list of Field codec values
-        - parent (None or int): Field parent or None
-        - keys (None or list): Field keys
-        - coef (None or int): coef if primary Field else None
-        - leng (int): length of the Field
-        '''
-        ntv = Ntv.obj(field)
-        typ = ntv.type_str if ntv.ntv_type else None
-        nam = ntv.name
+    
+    @staticmethod 
+    def decode_ntv_to_val(ntv):
+        ''' return a value from a ntv_field'''
         if isinstance(ntv, NtvSingle):
-            return (nam, typ, [ntv.to_obj(simpleval=True)], None, None, None, 1)
-        val = [ntv_val.to_obj() for ntv_val in ntv]
-        if len(ntv) < 2 or len(ntv) > 3 or isinstance(ntv[0], NtvSingle):
-            return (nam, typ, val, None, None, None, len(ntv))
-
-        ntvc = ntv[0]
-        leng = max(len(ind) for ind in ntv)
-        typc = ntvc.type_str if ntvc.ntv_type else None
-        valc = ntvc.to_obj(simpleval=True)
-        if len(ntv) == 3 and isinstance(ntv[1], NtvSingle) and \
-                isinstance(ntv[1].val, (int, str)) and not isinstance(ntv[2], NtvSingle) and \
-                isinstance(ntv[2][0].val, int):
-            return (nam, typc, valc, ntv[1].val, ntv[2].to_obj(), None, leng)
-        if len(ntv) == 2 and len(ntv[1]) == 1 and isinstance(ntv[1].val, (int, str)):
-            return (nam, typc, valc, ntv[1].val, None, None, leng)
-        if len(ntv) == 2 and len(ntv[1]) == 1 and isinstance(ntv[1].val, list):
-            leng = leng * ntv[1][0].val
-            return (nam, typc, valc, None, None, ntv[1][0].val, leng)
-        if len(ntv) == 2 and len(ntv[1]) > 1 and isinstance(ntv[1][0].val, int):
-            return (nam, typc, valc, None, ntv[1].to_obj(), None, leng)
-        return (nam, typ, val, None, None, None, len(ntv))
+            return ntv.to_obj(simpleval=True)
+        return [ntv_val.to_obj() for ntv_val in ntv]
 
     @staticmethod
     def name_table(fields):

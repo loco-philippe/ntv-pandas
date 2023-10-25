@@ -1,6 +1,7 @@
 build/
 dist/
 __pycache__/
+ntv_pandas.egg-info/
 Project1/
 *.so
 *.il

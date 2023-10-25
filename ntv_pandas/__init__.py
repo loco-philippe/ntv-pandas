@@ -16,6 +16,7 @@ This package contains the following classes and functions:
     - `ntv-pandas.ntv_pandas.pandas_ntv_connector.to_json`
     - `ntv-pandas.ntv_pandas.pandas_ntv_connector.read_json`
     - `ntv-pandas.ntv_pandas.pandas_ntv_connector.as_def_type`
+    - `ntv-pandas.ntv_pandas.pandas_ntv_connector.equals`
 
 - `ntv-pandas.ntv_pandas.accessors` :
     

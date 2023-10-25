@@ -1,20 +1,26 @@
-### *NTV-pandas : A semantic, compact and reversible JSON-pandas converter*    
+### *NTV-pandas : A semantic, compact and reversible JSON-pandas converter*
 
 <img src="https://loco-philippe.github.io/ES/ntv_pandas.png" alt="ntv-pandas" align="middle" style="height:80px;">
 
 For more information, see the [user guide](https://loco-philippe.github.io/ntv-pandas/docs/user_guide.html) or the [github repository](https://github.com/loco-philippe/ntv-pandas).
 
+NTV-pandas is referenced in the [pandas ecosystem](https://pandas.pydata.org/community/ecosystem.html).
+
 # Why a NTV-pandas converter ?
+
 pandas provide JSON converter but three limitations are present:
+
 - the JSON-pandas converter take into account few data types,
 - the JSON-pandas converter is not always reversible (conversion round trip)
 - external data types (e.g. TableSchema types) are not included
 
 ## main features
-The NTV-pandas converter uses the [semantic NTV format](https://loco-philippe.github.io/ES/JSON%20semantic%20format%20(JSON-NTV).htm) 
-to include a large set of data types in a JSON representation.    
-    
+
+The NTV-pandas converter uses the [semantic NTV format](https://loco-philippe.github.io/ES/JSON%20semantic%20format%20(JSON-NTV).htm)
+to include a large set of data types in a JSON representation.
+
 The converter integrates:
+
 - all the pandas `dtype` and the data-type associated to a JSON representation,
 - an always reversible conversion,
 - a full compatibility with [Table Schema specification](http://dataprotocols.org/json-table-schema/#field-types-and-formats)
@@ -29,7 +35,8 @@ The DataFrame resulting from these JSON conversions are identical to the initial
 
 With the existing JSON interface, these conversions are not possible.
 
-*data example*
+Data example:
+
 ```python
 In [1]: from shapely.geometry import Point
         from datetime import date
@@ -57,10 +64,10 @@ Out[4]:       dates::date  value  value32  res coord::point   names  unique
         500    1985-02-05     30       32   20  POINT (3 4)  hector    True
 ```
 
-*JSON-NTV representation*
+JSON-NTV representation:
 
 ```python
-In [5]: df_to_json = npd.to_json(df)
+In [5]: df_to_json = df.npd.to_json()
         pprint(df_to_json, compact=True, width=120, sort_dicts=False)
 Out[5]: {':tab': {'index': [100, 200, 300, 400, 500],
                   'dates::date': ['1964-01-01', '1985-02-05', '2022-01-21', '1964-01-01', '1985-02-05'],
@@ -72,17 +79,17 @@ Out[5]: {':tab': {'index': [100, 200, 300, 400, 500],
                   'unique': True}}
 ```
 
-*Reversibility*
+Reversibility:
 
 ```python
 In [6]: print(npd.read_json(df_to_json).equals(df))
 Out[6]: True
 ```
 
-*Table Schema representation*
+Table Schema representation:
 
 ```python
-In [7]: df_to_table = npd.to_json(df, table=True)
+In [7]: df_to_table = df.npd.to_json(table=True)
         pprint(df_to_table['data'][0], sort_dicts=False)
 Out[7]: {'index': 100,
          'dates': '1964-01-01',
@@ -106,7 +113,7 @@ Out[8]: {'fields': [{'name': 'index', 'type': 'integer'},
          'pandas_version': '1.4.0'}
 ```
 
-*Reversibility*
+Reversibility:
 
 ```python
 In [9]: print(npd.read_json(df_to_table).equals(df))
