@@ -21,3 +21,8 @@ Project1/
 .cache
 .vscode
 .gitignore
+ntv_pandas.egg-info/dependency_links.txt
+ntv_pandas.egg-info/PKG-INFO
+ntv_pandas.egg-info/requires.txt
+ntv_pandas.egg-info/SOURCES.txt
+ntv_pandas.egg-info/top_level.txt
