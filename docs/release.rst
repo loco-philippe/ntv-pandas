@@ -1,6 +1,10 @@
 Version x.y.z
 =============
 
+1.0.2 (2023-11-23)
+--------------------
+- move `decode_ntv_tab` method in `ntv_util` module ('json_ntv')
+
 1.0.1 (2023-10-10)
 --------------------
 - add User Guide

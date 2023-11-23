@@ -13,7 +13,7 @@ long_description = (here / "README.md").read_text(encoding="utf-8")
 
 setup(
     name="ntv_pandas",
-    version="1.0.1",
+    version="1.0.2",
     description="NTV-pandas : A semantic, compact and reversible JSON-pandas converter",
     long_description=long_description,
     long_description_content_type="text/markdown",
