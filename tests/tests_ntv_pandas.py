@@ -71,10 +71,10 @@ class Test_NTV_pandas(unittest.TestCase):
 
                # with ntv_type unknown in pandas and NTV conversion
                pd.Series([Point(1, 0), Point(1, 1), Point(1, 2)], name='::point'),
-                #pd.Series([Polygon(), Polygon([[1.0, 2.0], [1.0, 3.0], [2.0, 4.0]]),
-                pd.Series([Polygon([[1.0, 2.0], [1.0, 3.0], [2.0, 4.0]]),
-                           Polygon([[1.0, 2.0], [1.0, 30.0], [30.0, 30.0], [30,2]],
-                                   [[[5.0, 16.0], [5.0, 27.0], [20.0, 27.0]]])], 
+               #pd.Series([Polygon(), Polygon([[1.0, 2.0], [1.0, 3.0], [2.0, 4.0]]),
+               pd.Series([Polygon([[1.0, 2.0], [1.0, 3.0], [2.0, 4.0]]),
+                          Polygon([[1.0, 2.0], [1.0, 30.0], [30.0, 30.0], [30,2]],
+                                  [[[5.0, 16.0], [5.0, 27.0], [20.0, 27.0]]])], 
                                    name='::polygon'),
                pd.Series([Point(1, 0), LineString([[1.0, 2.0], [1.0, 3.0]]),
                           Polygon([[1.0, 2.0], [1.0, 3.0], [2.0, 4.0]]),

@@ -295,16 +295,18 @@ class SeriesConnec(NtvConnector):
             cdc = pd.Series(srs.cat.categories)
             ntv_type = PdUtil.ntv_type(name_type, cdc.dtype.name)
             cat_value = PdUtil.ntv_val(ntv_type, cdc)
-            cat_value = NtvList(cat_value, ntv_type=ntv_type).to_obj()
+            cat_value = NtvList(cat_value, ntv_type=ntv_type)
             cod_value = list(srs.cat.codes)
             coef = NtvConnector.encode_coef(cod_value)
-            ntv_value = [cat_value, [coef] if coef else cod_value]
-            ntv_type = 'json'
+            ntv_value = [cat_value, NtvList([coef]) if coef else NtvList(cod_value)]
+            ntv_type = None
         else:
             ntv_type = PdUtil.ntv_type(name_type, srs.dtype.name)
-            ntv_value = PdUtil.ntv_val(ntv_type, srs)
+            ntv_value = Ntv.from_obj(PdUtil.ntv_val(ntv_type, srs), 
+                                     def_type=ntv_type).ntv_value
         if len(ntv_value) == 1:
-            return (NtvSingle(ntv_value[0], ntv_name, ntv_type).to_obj(), name,
+            ntv_value[0].set_name(ntv_name) 
+            return (ntv_value[0].to_obj(), name, 
                     SeriesConnec.clas_typ if not typ else typ)
         return (NtvList(ntv_value, ntv_name, ntv_type).to_obj(), name,
                 SeriesConnec.clas_typ if not typ else typ)
@@ -536,7 +538,7 @@ class PdUtil:
             if dtype in types_none.dtype.values:
                 return types_none.set_index('dtype').loc[dtype].ntv_type
             if not table:
-                return 'json'
+                return None
             typtab = SeriesConnec.typtab.set_index('name_type').loc[None]
             return typtab.set_index('dtype').loc[dtype.lower()].ntv_type
         return name_type
