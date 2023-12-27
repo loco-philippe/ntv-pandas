@@ -8,7 +8,8 @@ Created on Sun Oct 8 2023
 Accessor methods bound to pd.Series.npd, pd.DataFrame.npd
 """
 import pandas as pd
-from pandas_ntv_connector import to_json, as_def_type, equals
+from pandas_ntv_connector import to_json, as_def_type, equals, to_analysis
+from tab_analysis import AnaDataset
 
 try:
     # delete the accessor to avoid warning
@@ -24,11 +25,16 @@ class NpdDataFrameAccessor:
     def __init__(self, pandas_obj):
         self._obj = pandas_obj
 
+    def analysis(self, **kwargs):
+        """Accessor for method `tab_analysis.AnaDataset` applied with 
+        `pandas_ntv_connector.to_analysis` invoked as `pd.DataFrame.npd.analysis`"""
+        return AnaDataset(to_analysis(self._obj, **kwargs))
+
     def to_json(self, **kwargs):
         """Accessor for method `pandas_ntv_connector.to_json` invoked as
         `pd.DataFrame.npd.to_json`"""
         return to_json(self._obj, **kwargs)
-
+    
     def as_def_type(self):
         """Accessor for method `pandas_ntv_connector.as_def_type` invoked as
         `pd.DataFrame.npd.as_def_type`"""

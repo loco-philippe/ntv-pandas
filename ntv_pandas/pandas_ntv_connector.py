@@ -24,6 +24,7 @@ It contains :
 
 - an utility class with static methods : `PdUtil`
 """
+from time import time
 import os
 import datetime
 import json
@@ -39,6 +40,35 @@ from json_ntv.ntv_connector import ShapelyConnec
 
 path_ntv_pandas = Path(os.path.abspath(__file__)).parent
 
+def to_analysis(pd_array, distr=False):
+    '''return a dict with data used in AnaDataset module
+
+    *Parameters*
+
+    - **distr** : Boolean (default False) - If True, add distr information'''
+    t0 = time()
+    keys = [np.array(pd_array[col].astype('category').cat.codes) for col in pd_array.columns]
+    t1 = time()
+    print(t1-t0)
+    lencodec = [len(np.unique(key)) for key in keys]
+    t2 = time()
+    print(t2-t1)
+    a_supprimer = [[np.column_stack((keys[i], keys[j]))
+                   for j in range(i+1, len(pd_array.columns))]
+                  for i in range(len(pd_array.columns)-1)]
+    t4 = time()
+    print(t4-t2)
+    dist = [[len(np.unique(np.column_stack((keys[i], keys[j])), axis=0))
+                   for j in range(i+1, len(pd_array.columns))]
+                  for i in range(len(pd_array.columns)-1)]
+    t3 = time()
+    print(t3-t2)
+    return {'fields': [{'lencodec': lencodec[ind], 'id': pd_array.columns[ind]}
+                       for ind in range(len(pd_array.columns))],
+            'name': None, 'length': len(pd_array), 
+            'relations': {pd_array.columns[i]: {pd_array.columns[j+i+1]: dist[i][j]
+                           for j in range(len(dist[i]))} for i in range(len(dist))}
+            }
 
 def to_json(pd_array, **kwargs):
     ''' convert pandas Series or Dataframe to JSON text or JSON Value.
