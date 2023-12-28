@@ -17,14 +17,19 @@ A NtvConnector is defined by:
 It contains :
 
 - functions `read_json` and `to_json` to convert JSON data and pandas entities
+- functions `to_analysis` to create data used by the `tab_analysis` module
+- functions `as_def_type` and `equals` 
 
 - the child classes of `NTV.json_ntv.ntv.NtvConnector` abstract class:
     - `DataFrameConnec`: 'tab'   connector
     - `SeriesConnec`:    'field' connector
 
 - an utility class with static methods : `PdUtil`
+
+The functions `to_json`, `to_analysis`, `as_def_type` and `equals` are used with 
+the `npd` accessor.
+
 """
-from time import time
 import os
 import datetime
 import json
@@ -40,78 +45,20 @@ from json_ntv.ntv_connector import ShapelyConnec
 
 path_ntv_pandas = Path(os.path.abspath(__file__)).parent
 
-def to_analysis(pd_array, distr=False):
-    '''return a dict with data used in AnaDataset module
+def to_analysis(pd_array):
+    '''return a dict with data used in AnaDataset module'''
 
-    *Parameters*
-
-    - **distr** : Boolean (default False) - If True, add distr information'''
-
-    # len(np.unique(np.fromiter(zip(np1,np2), dtype='object')))
-    # df2['zip'] = pd.Series(zip(df2['field1'], df2['field2']))
-
-    t0 = time()
     keys = [list(pd_array[col].astype('category').cat.codes) for col in pd_array.columns]
-    t1 = time()
-    print(t1-t0)
     lencodec = [ len(set(key)) for key in keys]
-    t2 = time()
-    print(t2-t1)
     dist = [[len(set(zip(keys[i], keys[j])))
                    for j in range(i+1, len(keys))]
                   for i in range(len(keys)-1)]
-    t3 = time()
-    print(t3-t2)
-    return {'fields': [{'lencodec': lencodec[ind], 'id': pd_array.columns[ind]}
+    return {'fields': [{'lencodec': lencodec[ind], 'id': pd_array.columns[ind],
+                        'mincodec': lencodec[ind]}
                        for ind in range(len(pd_array.columns))],
             'name': None, 'length': len(pd_array), 
             'relations': {pd_array.columns[i]: {pd_array.columns[j+i+1]: dist[i][j]
-                           for j in range(len(dist[i]))} for i in range(len(dist))}
-            }
-
-    """t0 = time()
-    keys = pd.DataFrame({col: pd_array[col].astype('category').cat.codes for col in pd_array.columns})
-    t1 = time()
-    print(t1-t0)
-    lencodec = [ len(keys[col].astype('category').cat.categories) for col in keys.columns]
-    t2 = time()
-    print(t2-t1)
-    dist = [[len(pd.Series(keys[[keys.columns[i], keys.columns[j]]].apply(tuple, axis=1).astype('category').cat.categories))
-                   for j in range(i+1, len(keys.columns))]
-                  for i in range(len(keys.columns)-1)]
-    t3 = time()
-    print(t3-t2)
-    return {'fields': [{'lencodec': lencodec[ind], 'id': pd_array.columns[ind]}
-                       for ind in range(len(pd_array.columns))],
-            'name': None, 'length': len(pd_array), 
-            'relations': {pd_array.columns[i]: {pd_array.columns[j+i+1]: dist[i][j]
-                           for j in range(len(dist[i]))} for i in range(len(dist))}
-            }"""
-
-
-    """t0 = time()
-    keys = [np.array(pd_array[col].astype('category').cat.codes) for col in pd_array.columns]
-    t1 = time()
-    print(t1-t0)
-    lencodec = [len(np.unique(key)) for key in keys]
-    t2 = time()
-    print(t2-t1)
-    a_supprimer = [[np.column_stack((keys[i], keys[j]))
-                   for j in range(i+1, len(pd_array.columns))]
-                  for i in range(len(pd_array.columns)-1)]
-    t4 = time()
-    print(t4-t2)
-    dist = [[len(np.unique(np.column_stack((keys[i], keys[j])), axis=0))
-                   for j in range(i+1, len(pd_array.columns))]
-                  for i in range(len(pd_array.columns)-1)]
-    t3 = time()
-    print(t3-t2)
-    return {'fields': [{'lencodec': lencodec[ind], 'id': pd_array.columns[ind]}
-                       for ind in range(len(pd_array.columns))],
-            'name': None, 'length': len(pd_array), 
-            'relations': {pd_array.columns[i]: {pd_array.columns[j+i+1]: dist[i][j]
-                           for j in range(len(dist[i]))} for i in range(len(dist))}
-            }"""
+                          for j in range(len(dist[i]))} for i in range(len(dist))}}
 
 def to_json(pd_array, **kwargs):
     ''' convert pandas Series or Dataframe to JSON text or JSON Value.

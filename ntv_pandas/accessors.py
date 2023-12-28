@@ -25,10 +25,10 @@ class NpdDataFrameAccessor:
     def __init__(self, pandas_obj):
         self._obj = pandas_obj
 
-    def analysis(self, **kwargs):
+    def analysis(self):
         """Accessor for method `tab_analysis.AnaDataset` applied with 
         `pandas_ntv_connector.to_analysis` invoked as `pd.DataFrame.npd.analysis`"""
-        return AnaDataset(to_analysis(self._obj, **kwargs))
+        return AnaDataset(to_analysis(self._obj))
 
     def to_json(self, **kwargs):
         """Accessor for method `pandas_ntv_connector.to_json` invoked as
