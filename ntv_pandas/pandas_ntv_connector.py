@@ -46,7 +46,50 @@ def to_analysis(pd_array, distr=False):
     *Parameters*
 
     - **distr** : Boolean (default False) - If True, add distr information'''
+
+    # len(np.unique(np.fromiter(zip(np1,np2), dtype='object')))
+    # df2['zip'] = pd.Series(zip(df2['field1'], df2['field2']))
+
     t0 = time()
+    keys = [list(pd_array[col].astype('category').cat.codes) for col in pd_array.columns]
+    t1 = time()
+    print(t1-t0)
+    lencodec = [ len(set(key)) for key in keys]
+    t2 = time()
+    print(t2-t1)
+    dist = [[len(set(zip(keys[i], keys[j])))
+                   for j in range(i+1, len(keys))]
+                  for i in range(len(keys)-1)]
+    t3 = time()
+    print(t3-t2)
+    return {'fields': [{'lencodec': lencodec[ind], 'id': pd_array.columns[ind]}
+                       for ind in range(len(pd_array.columns))],
+            'name': None, 'length': len(pd_array), 
+            'relations': {pd_array.columns[i]: {pd_array.columns[j+i+1]: dist[i][j]
+                           for j in range(len(dist[i]))} for i in range(len(dist))}
+            }
+
+    """t0 = time()
+    keys = pd.DataFrame({col: pd_array[col].astype('category').cat.codes for col in pd_array.columns})
+    t1 = time()
+    print(t1-t0)
+    lencodec = [ len(keys[col].astype('category').cat.categories) for col in keys.columns]
+    t2 = time()
+    print(t2-t1)
+    dist = [[len(pd.Series(keys[[keys.columns[i], keys.columns[j]]].apply(tuple, axis=1).astype('category').cat.categories))
+                   for j in range(i+1, len(keys.columns))]
+                  for i in range(len(keys.columns)-1)]
+    t3 = time()
+    print(t3-t2)
+    return {'fields': [{'lencodec': lencodec[ind], 'id': pd_array.columns[ind]}
+                       for ind in range(len(pd_array.columns))],
+            'name': None, 'length': len(pd_array), 
+            'relations': {pd_array.columns[i]: {pd_array.columns[j+i+1]: dist[i][j]
+                           for j in range(len(dist[i]))} for i in range(len(dist))}
+            }"""
+
+
+    """t0 = time()
     keys = [np.array(pd_array[col].astype('category').cat.codes) for col in pd_array.columns]
     t1 = time()
     print(t1-t0)
@@ -68,7 +111,7 @@ def to_analysis(pd_array, distr=False):
             'name': None, 'length': len(pd_array), 
             'relations': {pd_array.columns[i]: {pd_array.columns[j+i+1]: dist[i][j]
                            for j in range(len(dist[i]))} for i in range(len(dist))}
-            }
+            }"""
 
 def to_json(pd_array, **kwargs):
     ''' convert pandas Series or Dataframe to JSON text or JSON Value.
