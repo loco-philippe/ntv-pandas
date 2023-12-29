@@ -15,6 +15,7 @@ This package contains the following classes and functions:
     - `ntv-pandas.ntv_pandas.pandas_ntv_connector.PdUtil`
     - `ntv-pandas.ntv_pandas.pandas_ntv_connector.to_json`
     - `ntv-pandas.ntv_pandas.pandas_ntv_connector.read_json`
+    - `ntv-pandas.ntv_pandas.pandas_ntv_connector.analysis`
     - `ntv-pandas.ntv_pandas.pandas_ntv_connector.as_def_type`
     - `ntv-pandas.ntv_pandas.pandas_ntv_connector.equals`
 
@@ -27,7 +28,7 @@ This package contains the following classes and functions:
 """
 #from pathlib import Path
 from ntv_pandas.pandas_ntv_connector import DataFrameConnec, SeriesConnec, read_json
-from ntv_pandas.pandas_ntv_connector import to_json, as_def_type, equals
+from ntv_pandas.pandas_ntv_connector import to_json, as_def_type, equals, analysis
 import ntv_pandas.accessors
 #import ntv_pandas.pandas_ntv_connector
 
