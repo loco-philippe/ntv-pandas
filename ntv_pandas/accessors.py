@@ -8,7 +8,7 @@ Created on Sun Oct 8 2023
 Accessor methods bound to pd.Series.npd, pd.DataFrame.npd
 """
 import pandas as pd
-from pandas_ntv_connector import to_json, as_def_type, equals, to_analysis
+from pandas_ntv_connector import to_json, as_def_type, equals, to_analysis, check_relation
 from tab_analysis import AnaDataset
 
 try:
@@ -30,6 +30,11 @@ class NpdDataFrameAccessor:
         `pandas_ntv_connector.to_analysis` invoked as `pd.DataFrame.npd.analysis`"""
         return AnaDataset(to_analysis(self._obj))
 
+    def check_relation(self, parent, child, typecoupl, value=True):
+        ''' Accessor for method `pandas_ntv_connector.check_relation` invoket as 
+        `pd.DataFrame.npd.check_relation`'''
+        return check_relation(self._obj, parent, child, typecoupl, value)
+    
     def to_json(self, **kwargs):
         """Accessor for method `pandas_ntv_connector.to_json` invoked as
         `pd.DataFrame.npd.to_json`"""

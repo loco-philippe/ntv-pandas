@@ -42,49 +42,56 @@ import numpy as np
 from json_ntv.ntv import Ntv, NtvConnector, NtvList, NtvSingle
 from json_ntv.ntv_util import NtvUtil
 from json_ntv.ntv_connector import ShapelyConnec
+from tab_dataset import Cfield
 
 path_ntv_pandas = Path(os.path.abspath(__file__)).parent
 
-def to_analysis(pd_array):
-    '''return a dict with data used in AnaDataset module'''
+def as_def_type(pd_array):
+    '''convert a Series or DataFrame with default dtype'''
+    if isinstance(pd_array, (pd.Series, pd.Index)):
+        return pd_array.astype(SeriesConnec.deftype.get(pd_array.dtype.name, pd_array.dtype.name))
+    return pd.DataFrame({col: as_def_type(pd_array[col]) for col in pd_array.columns})
 
-    keys = [list(pd_array[col].astype('category').cat.codes) for col in pd_array.columns]
-    lencodec = [ len(set(key)) for key in keys]
-    dist = [[len(set(zip(keys[i], keys[j])))
-                   for j in range(i+1, len(keys))]
-                  for i in range(len(keys)-1)]
-    return {'fields': [{'lencodec': lencodec[ind], 'id': pd_array.columns[ind],
-                        'mincodec': lencodec[ind]}
-                       for ind in range(len(pd_array.columns))],
-            'name': None, 'length': len(pd_array), 
-            'relations': {pd_array.columns[i]: {pd_array.columns[j+i+1]: dist[i][j]
-                          for j in range(len(dist[i]))} for i in range(len(dist))}}
+def check_relation(pd_df, parent, child, typecoupl, value=True):
+    ''' Accessor for method `cdataset.Cdataset.check_relation` invoket as 
+    `pd.DataFrame.npd.check_relation`.
+    Get the inconsistent records for a relationship.
 
-def to_json(pd_array, **kwargs):
-    ''' convert pandas Series or Dataframe to JSON text or JSON Value.
+     *Parameters*
 
-    *parameters*
+    - **child** : str - name of the child Series involved in the relation
+    - **parent**: str - name of the parent Series involved in the relation
+    - **typecoupl**: str - relationship to check ('derived' or 'coupled')
+    - **value**: boolean (default True) - if True return a dict with inconsistent
+    values of the Series, else a tuple with index of records)
 
-    - **pd_array** : Series or Dataframe to convert
-    - **encoded** : boolean (default: False) - if True return a JSON text else a JSON value
-    - **header** : boolean (default: True) - if True the JSON data is included as
-    value in a {key:value} object where key is ':field' for Series or ':tab' for DataFrame
-    - **table** : boolean (default False) - if True return TableSchema format
-    '''
-    option = {'encoded': False, 'header': True, 'table': False} | kwargs
-    option['header'] = False if option['table'] else option['header']
-    if isinstance(pd_array, pd.Series):
-        jsn = SeriesConnec.to_json_ntv(pd_array, table=option['table'])[0]
-        head = ':field'
-    else:
-        jsn = DataFrameConnec.to_json_ntv(pd_array, table=option['table'])[0]
-        head = ':tab'
-    if option['header']:
-        jsn = {head: jsn}
-    if option['encoded']:
-        return json.dumps(jsn)
-    return jsn
+    *Returns* :
 
+    - dict with inconsistent values of the Series
+    - or a tuple with row of records'''
+    parent_idx = SeriesConnec.to_idx(pd_df[parent])
+    parent_field = Cfield(parent_idx['codec'], parent, parent_idx['keys'])
+    child_idx = SeriesConnec.to_idx(pd_df[child])
+    child_field = Cfield(child_idx['codec'], child, child_idx['keys'])
+    return  Cfield.check_relation(parent_field, child_field, typecoupl, value)
+
+    
+def equals(pdself, pdother):
+    '''return True if pd.equals is True and names are equal and dtype of categories are equal'''
+    equ = True
+    if isinstance(pdself, pd.Series) and isinstance(pdother, pd.Series):
+        type_cat = str(pdself.dtype) == str(pdother.dtype) == 'category'
+        if type_cat:
+            equ &= equals(pdself.cat.categories, pdother.cat.categories)
+        else:
+            equ &= as_def_type(pdself).equals(as_def_type(pdother))
+        equ &= pdself.name == pdother.name
+        if not equ:
+            return False
+    elif isinstance(pdself, pd.DataFrame) and isinstance(pdother, pd.DataFrame):
+        for cself, cother in zip(pdself, pdother):
+            equ &= equals(pdself[cself], pdother[cother])
+    return equ
 
 def read_json(jsn, **kwargs):
     ''' convert JSON text or JSON Value to pandas Series or Dataframe.
@@ -115,30 +122,45 @@ def read_json(jsn, **kwargs):
         return SeriesConnec.to_obj_ntv(ntv, **option)
     return DataFrameConnec.to_obj_ntv(ntv.ntv_value, **option)
 
+def to_analysis(pd_df):
+    '''return a dict with data used in AnaDataset module'''
 
-def as_def_type(pd_array):
-    '''convert a Series or DataFrame with default dtype'''
-    if isinstance(pd_array, (pd.Series, pd.Index)):
-        return pd_array.astype(SeriesConnec.deftype.get(pd_array.dtype.name, pd_array.dtype.name))
-    return pd.DataFrame({col: as_def_type(pd_array[col]) for col in pd_array.columns})
+    keys = [list(pd_df[col].astype('category').cat.codes) for col in pd_df.columns]
+    lencodec = [ len(set(key)) for key in keys]
+    dist = [[len(set(zip(keys[i], keys[j])))
+                   for j in range(i+1, len(keys))]
+                  for i in range(len(keys)-1)]
+    return {'fields': [{'lencodec': lencodec[ind], 'id': pd_df.columns[ind],
+                        'mincodec': lencodec[ind]}
+                       for ind in range(len(pd_df.columns))],
+            'name': None, 'length': len(pd_df), 
+            'relations': {pd_df.columns[i]: {pd_df.columns[j+i+1]: dist[i][j]
+                          for j in range(len(dist[i]))} for i in range(len(dist))}}
 
+def to_json(pd_array, **kwargs):
+    ''' convert pandas Series or Dataframe to JSON text or JSON Value.
 
-def equals(pdself, pdother):
-    '''return True if pd.equals is True and names are equal and dtype of categories are equal'''
-    equ = True
-    if isinstance(pdself, pd.Series) and isinstance(pdother, pd.Series):
-        type_cat = str(pdself.dtype) == str(pdother.dtype) == 'category'
-        if type_cat:
-            equ &= equals(pdself.cat.categories, pdother.cat.categories)
-        else:
-            equ &= as_def_type(pdself).equals(as_def_type(pdother))
-        equ &= pdself.name == pdother.name
-        if not equ:
-            return False
-    elif isinstance(pdself, pd.DataFrame) and isinstance(pdother, pd.DataFrame):
-        for cself, cother in zip(pdself, pdother):
-            equ &= equals(pdself[cself], pdother[cother])
-    return equ
+    *parameters*
+
+    - **pd_array** : Series or Dataframe to convert
+    - **encoded** : boolean (default: False) - if True return a JSON text else a JSON value
+    - **header** : boolean (default: True) - if True the JSON data is included as
+    value in a {key:value} object where key is ':field' for Series or ':tab' for DataFrame
+    - **table** : boolean (default False) - if True return TableSchema format
+    '''
+    option = {'encoded': False, 'header': True, 'table': False} | kwargs
+    option['header'] = False if option['table'] else option['header']
+    if isinstance(pd_array, pd.Series):
+        jsn = SeriesConnec.to_json_ntv(pd_array, table=option['table'])[0]
+        head = ':field'
+    else:
+        jsn = DataFrameConnec.to_json_ntv(pd_array, table=option['table'])[0]
+        head = ':tab'
+    if option['header']:
+        jsn = {head: jsn}
+    if option['encoded']:
+        return json.dumps(jsn)
+    return jsn
 
 
 class DataFrameConnec(NtvConnector):
@@ -346,7 +368,7 @@ class SeriesConnec(NtvConnector):
         if lis and isinstance(lis[0], pd._libs.tslibs.timestamps.Timestamp):
             lis = [ts.to_pydatetime().astimezone(datetime.timezone.utc)
                    for ts in lis]
-        return {'codec': lis, 'name': ser .name, 'keys': list(idx.cat.codes)}
+        return {'codec': lis, 'name': ser.name, 'keys': list(idx.cat.codes)}
 
     @staticmethod
     def to_series(ntv_codec, ntv_name, ntv_keys, **kwargs):
