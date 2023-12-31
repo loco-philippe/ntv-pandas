@@ -17,7 +17,8 @@ A NtvConnector is defined by:
 It contains :
 
 - functions `read_json` and `to_json` to convert JSON data and pandas entities
-- functions `to_analysis` to create data used by the `tab_analysis` module
+- function `to_analysis` to create data used by the `tab_analysis` module
+- function `check_relation` to identify rows with inconsistent relationships (`tab_dataset` function)
 - functions `as_def_type` and `equals` 
 
 - the child classes of `NTV.json_ntv.ntv.NtvConnector` abstract class:
@@ -26,8 +27,8 @@ It contains :
 
 - an utility class with static methods : `PdUtil`
 
-The functions `to_json`, `to_analysis`, `as_def_type` and `equals` are used with 
-the `npd` accessor.
+The functions `to_json`, `to_analysis`, `check_relation`, `as_def_type` and 
+`equals` are used with the `npd` accessor.
 
 """
 import os
