@@ -13,8 +13,8 @@ long_description = (here / "README.md").read_text(encoding="utf-8")
 
 setup(
     name="ntv_pandas",
-    version="1.0.2",
-    description="NTV-pandas : A semantic, compact and reversible JSON-pandas converter",
+    version="1.1.0",
+    description="NTV-pandas : A tabular analyzer and a semantic, compact and reversible JSON-pandas converter",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/loco-philippe/ntv-pandas/blob/main/README.md",

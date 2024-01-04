@@ -1,6 +1,13 @@
 Version x.y.z
 =============
 
+1.1.0 (2024-01-04)
+--------------------
+- add `to_analysis` function to use `TAB-analysis`module
+- add `check_relation` function to use `TAB-dataset.check_relation` method
+- add pandas accessor for `to_analysis` and `check_relation`
+
+
 1.0.2 (2023-11-23)
 --------------------
 - move `decode_ntv_tab` method in `ntv_util` module ('json_ntv')

@@ -1,4 +1,4 @@
-### *NTV-pandas : A semantic, compact and reversible JSON-pandas converter*
+### *NTV-pandas : A tabular analyzer and a semantic, compact and reversible JSON-pandas converter*
 
 <img src="https://loco-philippe.github.io/ES/ntv_pandas.png" alt="ntv-pandas" align="middle" style="height:80px;">
 
@@ -14,6 +14,8 @@ pandas provide JSON converter but three limitations are present:
 - the JSON-pandas converter is not always reversible (conversion round trip)
 - external data types (e.g. TableSchema types) are not included
 
+pandas does not have a tool for analyzing tabular structures and detecting integrity errors
+
 ## main features
 
 The NTV-pandas converter uses the [semantic NTV format](https://loco-philippe.github.io/ES/JSON%20semantic%20format%20(JSON-NTV).htm)
@@ -25,9 +27,11 @@ The converter integrates:
 - an always reversible conversion,
 - a full compatibility with [Table Schema specification](http://dataprotocols.org/json-table-schema/#field-types-and-formats)
 
+The NTV-pandas analyzer uses the [TAB-analysis](https://github.com/loco-philippe/tab-analysis/blob/main/README.md) tool to analyze and measure the relationships between Fields in DataFrame and the [TAB-dataset](https://github.com/loco-philippe/tab-dataset/blob/main/README.md) to identify integrity errors ([example](https://github.com/loco-philippe/ntv-pandas/tree/main/example#readme)).
+
 NTV-pandas was developped originally in the [json-NTV project](https://github.com/loco-philippe/NTV)
 
-## example
+## converter example
 
 In the example below, a DataFrame with multiple data types is converted to JSON (first to NTV format and then to Table Schema format).
 

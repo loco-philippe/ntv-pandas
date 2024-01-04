@@ -11,6 +11,7 @@ The documentation presents :
 
 - API
   - [dev](https://loco-philippe.github.io/ntv-pandas/ntv_pandas.html)
+  - [v1.1.0](https://loco-philippe.github.io/ntv-pandas/v1.1.0/ntv_pandas.html)
   - [v1.0.2](https://loco-philippe.github.io/ntv-pandas/v1.0.2/ntv_pandas.html)
   - [v1.0.1](https://loco-philippe.github.io/ntv-pandas/v1.0.1/ntv_pandas.html)
   - [v1.0.0](https://loco-philippe.github.io/ntv-pandas/v1.0.0/ntv_pandas.html)
