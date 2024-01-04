@@ -43,7 +43,7 @@ import numpy as np
 from json_ntv.ntv import Ntv, NtvConnector, NtvList, NtvSingle
 from json_ntv.ntv_util import NtvUtil
 from json_ntv.ntv_connector import ShapelyConnec
-from tab_dataset import Cfield
+from tab_dataset.cfield import Cfield
 
 path_ntv_pandas = Path(os.path.abspath(__file__)).parent
 

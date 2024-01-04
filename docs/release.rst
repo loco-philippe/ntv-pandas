@@ -1,6 +1,10 @@
 Version x.y.z
 =============
 
+1.1.1 (2024-01-05)
+--------------------
+- bug setup
+
 1.1.0 (2024-01-04)
 --------------------
 - add `to_analysis` function to use `TAB-analysis`module

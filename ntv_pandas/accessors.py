@@ -8,7 +8,7 @@ Created on Sun Oct 8 2023
 Accessor methods bound to pd.Series.npd, pd.DataFrame.npd
 """
 import pandas as pd
-from pandas_ntv_connector import to_json, as_def_type, equals, to_analysis, check_relation
+from ntv_pandas.pandas_ntv_connector import to_json, as_def_type, equals, to_analysis, check_relation
 from tab_analysis import AnaDataset
 
 try:
