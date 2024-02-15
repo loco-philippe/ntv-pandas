@@ -9,7 +9,7 @@ The `NTV.test_ntv` module contains the unit tests (class unittest) for the
 """
 import unittest
 import datetime
-from datetime import date, time
+from datetime import date
 
 import pandas as pd
 import ntv_pandas as npd

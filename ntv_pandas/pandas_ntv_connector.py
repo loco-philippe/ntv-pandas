@@ -148,14 +148,16 @@ def to_json(pd_array, **kwargs):
     - **header** : boolean (default: True) - if True the JSON data is included as
     value in a {key:value} object where key is ':field' for Series or ':tab' for DataFrame
     - **table** : boolean (default False) - if True return TableSchema format
+    - **index** : boolean (default True) - if True the index Series is included
     '''
-    option = {'encoded': False, 'header': True, 'table': False} | kwargs
+    option = {'encoded': False, 'header': True, 'table': False, 'index': True} | kwargs
     option['header'] = False if option['table'] else option['header']
     if isinstance(pd_array, pd.Series):
         jsn = SeriesConnec.to_json_ntv(pd_array, table=option['table'])[0]
         head = ':field'
     else:
-        jsn = DataFrameConnec.to_json_ntv(pd_array, table=option['table'])[0]
+        jsn = DataFrameConnec.to_json_ntv(pd_array, table=option['table'], 
+                                          index=option['index'])[0]
         head = ':tab'
     if option['header']:
         jsn = {head: jsn}
@@ -213,11 +215,13 @@ class DataFrameConnec(NtvConnector):
         - **typ** : string (default None) - type of the NTV object,
         - **name** : string (default None) - name of the NTV object
         - **value** : DataFrame values
-        - **table** : boolean (default False) - if True return TableSchema format'''
-
+        - **table** : boolean (default False) - if True return TableSchema format
+        - **index** : boolean (default True) - if True the index Series is included
+        '''
         table = kwargs.get('table', False)
+        index = kwargs.get('index', True)
         if not table:
-            df2 = value.reset_index()
+            df2 = value.reset_index() if index else value
             jsn = Ntv.obj([SeriesConnec.to_json_ntv(PdUtil.unic(df2[col]))[0]
                            for col in df2.columns]).to_obj()
             return (jsn, name, DataFrameConnec.clas_typ if not typ else typ)
