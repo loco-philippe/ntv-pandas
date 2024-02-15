@@ -1,5 +1,5 @@
 ---
-name: "[ENH] Feature request"
+name: "[ENH]"
 about: Suggest an idea for this project
 title: ''
 labels: ''
