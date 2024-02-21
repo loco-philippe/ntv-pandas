@@ -36,6 +36,7 @@ import datetime
 import json
 import configparser
 from pathlib import Path
+from collections import Counter
 import pandas as pd
 import numpy as np
 
@@ -123,14 +124,32 @@ def read_json(jsn, **kwargs):
         return SeriesConnec.to_obj_ntv(ntv, **option)
     return DataFrameConnec.to_obj_ntv(ntv.ntv_value, **option)
 
-def to_analysis(pd_df):
+def _dist(key1, key2, distr=False):
+    '''return default coupling codec between two keys list and optionaly if
+    the relationship is distributed'''
+    if not key1 or not key2:
+        return 0
+    k1k2 = [tuple((v1, v2)) for v1, v2 in zip(key1, key2)]
+    dist = len(list(dict.fromkeys(k1k2)))
+    if not distr:
+        return dist
+    distrib = False
+    if dist == (max(key1) + 1) * (max(key2) + 1):
+        distrib = max(Counter(k1k2).values()) == len(key1) // dist
+        # distrib = min(sum(map(lambda x: (x + i) % (max(a) + 1), a)) == sum(a) for i in range(1, max(a)+1)) 
+    return [dist, distrib]
+
+def to_analysis(pd_df, distr=False):
     '''return a dict with data used in AnaDataset module'''
 
     keys = [list(pd_df[col].astype('category').cat.codes) for col in pd_df.columns]
     lencodec = [ len(set(key)) for key in keys]
-    dist = [[len(set(zip(keys[i], keys[j])))
-                   for j in range(i+1, len(keys))]
-                  for i in range(len(keys)-1)]
+    if distr:
+        dist = [[_dist(keys[i], keys[j], distr) for j in range(i+1, len(keys))]
+                                                  for i in range(len(keys)-1)]
+    else:
+        dist = [[len(set(zip(keys[i], keys[j]))) for j in range(i+1, len(keys))]
+                                                  for i in range(len(keys)-1)]
     return {'fields': [{'lencodec': lencodec[ind], 'id': pd_df.columns[ind],
                         'mincodec': lencodec[ind]}
                        for ind in range(len(pd_df.columns))],
