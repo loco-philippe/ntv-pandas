@@ -15,7 +15,7 @@ import pandas as pd
 import ntv_pandas as npd
 from shapely.geometry import Point, Polygon, LineString
     
-from json_ntv import Ntv        
+from json_ntv import Ntv   
 
 class Test_NTV_pandas(unittest.TestCase):
     
@@ -156,6 +156,7 @@ class Test_table_pandas(unittest.TestCase):
             rang = [field['name'] for field in fields].index('test')
             self.assertFalse(fields[rang]['type'] is None)
             self.assertTrue(df.equals(npd.read_json(npd.to_json(df, table=True))))
+
 if __name__ == '__main__':
     
     unittest.main(verbosity=2)

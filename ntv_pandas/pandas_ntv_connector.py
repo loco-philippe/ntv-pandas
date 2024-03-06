@@ -80,20 +80,25 @@ def check_relation(pd_df, parent, child, typecoupl, value=True):
     
 def equals(pdself, pdother):
     '''return True if pd.equals is True and names are equal and dtype of categories are equal'''
-    equ = True
+    #equ = True
     if isinstance(pdself, pd.Series) and isinstance(pdother, pd.Series):
-        type_cat = str(pdself.dtype) == str(pdother.dtype) == 'category'
+        return SeriesConnec.equals(pdself, pdother)
+        '''type_cat = str(pdself.dtype) == str(pdother.dtype) == 'category'
         if type_cat:
             equ &= equals(pdself.cat.categories, pdother.cat.categories)
         else:
             equ &= as_def_type(pdself).equals(as_def_type(pdother))
         equ &= pdself.name == pdother.name
         if not equ:
-            return False
+            return False'''
     elif isinstance(pdself, pd.DataFrame) and isinstance(pdother, pd.DataFrame):
-        for cself, cother in zip(pdself, pdother):
-            equ &= equals(pdself[cself], pdother[cother])
-    return equ
+        return DataFrameConnec.equals(pdself, pdother)
+        #for cself, cother in zip(pdself, pdother):
+        #    equ &= equals(pdself[cself], pdother[cother])
+    #else:
+    #    equ = False
+    #return equ
+    return False
 
 def read_json(jsn, **kwargs):
     ''' convert JSON text or JSON Value to pandas Series or Dataframe.
@@ -266,7 +271,18 @@ class DataFrameConnec(NtvConnector):
         - **lenght** of the DataFrame'''
         return ([SeriesConnec.to_idx(ser) for name, ser in dtf.items()], len(dtf))
 
-
+    @staticmethod
+    def equals(pdself, pdother):
+        '''return True if columns are equals'''
+        if not (isinstance(pdself, pd.DataFrame) and isinstance(pdother, pd.DataFrame)):
+            return False
+        if len(pdself.columns) != len(pdother.columns):
+            return False
+        for cself, cother in zip(pdself, pdother):
+            if not SeriesConnec.equals(pdself[cself], pdother[cother]):
+                return False
+        return True
+    
 class SeriesConnec(NtvConnector):
     '''NTV connector for pandas Series
 
@@ -464,7 +480,18 @@ class SeriesConnec(NtvConnector):
             srs = srs.rename(pd_name)
         return PdUtil.convert(ntv_type, srs, tojson=False)
 
-
+    def equals(pdself, pdother):
+        '''return True if pd.equals is True and names are equal and dtype of categories are equal'''
+        if not (isinstance(pdself, pd.Series) and isinstance(pdother, pd.Series)):
+            return False
+        if pdself.name != pdother.name:
+            return False
+        type_cat = str(pdself.dtype) == str(pdother.dtype) == 'category'
+        if type_cat:
+            return SeriesConnec.equals(pdself.cat.categories, pdother.cat.categories)
+        else:
+            return as_def_type(pdself).equals(as_def_type(pdother))
+    
 class PdUtil:
     '''ntv-pandas utilities.
 
@@ -616,7 +643,7 @@ class PdUtil:
         *Parameters*
 
         - **ntv_type** : string - NTVtype deduced from the Series name_type and dtype,
-        - **srs** : Series to be *converted.'''
+        - **srs** : Series to be converted.'''
         srs = PdUtil.convert(ntv_type, srs)
         if ntv_type in ['point', 'line', 'polygon', 'geometry', 'geojson']:
             return srs.to_list()
