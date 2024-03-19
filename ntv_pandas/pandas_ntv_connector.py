@@ -37,6 +37,7 @@ import json
 import configparser
 from pathlib import Path
 from collections import Counter
+from io import StringIO
 import pandas as pd
 import numpy as np
 
@@ -475,7 +476,7 @@ class SeriesConnec(NtvConnector):
         - **pd_name**: string - name of the Series including ntv_type
 
         NTVvalue and a ntv_type'''
-        srs = pd.read_json(json.dumps(data), dtype=dtype, typ='series')
+        srs = pd.read_json(StringIO(json.dumps(data)), dtype=dtype, typ='series')
         if not pd_name is None:
             srs = srs.rename(pd_name)
         return PdUtil.convert(ntv_type, srs, tojson=False)
@@ -523,7 +524,7 @@ class PdUtil:
                    for nam, ntvtyp in zip(name, ntv_type)]
         pd_dtype = [PdUtil.pd_name(nam, ntvtyp, table=True)[2]
                     for nam, ntvtyp in zip(name, ntv_type)]
-        dfr = pd.read_json(json.dumps(jsn['data']), orient='record')
+        dfr = pd.read_json(StringIO(json.dumps(jsn['data'])), orient='record')
         dfr = PdUtil.pd_index(dfr)
         dfr = pd.DataFrame({col: PdUtil.convert(ntv_type[ind], dfr[col], tojson=False)
                             for ind, col in enumerate(dfr.columns)})
@@ -613,7 +614,7 @@ class PdUtil:
         if ntv_type == 'date':
             return pd.to_datetime(srs).dt.date
         if ntv_type == 'time':
-            return pd.to_datetime(srs).dt.time
+            return pd.to_datetime(srs, format='mixed').dt.time
         return srs
 
     @staticmethod
