@@ -1,0 +1,7 @@
+---
+title: Example
+---
+flowchart TB
+    A[DataFrame \n fruits] <--lossless--> B[Neutral\nXdataset]
+    B <--[ plants, quantity, price_level ]--> E[Xarray / scipp 1]
+    B <--[ quantity, product ]--> F[Xarray / scipp 2]

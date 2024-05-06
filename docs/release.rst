@@ -1,6 +1,13 @@
 Version x.y.z
 =============
 
+2.0.0 (2024-05-06)
+--------------------
+- extension to multidimensional interfaces
+    - Xarray interface (`to_xarray` method, `from_xarray` function)
+    - scipp interface (`to_scipp` method, `from_scipp` function)
+- ENH #4 #5 #7 #8 #9
+
 1.1.1 (2024-01-05)
 --------------------
 - bug setup

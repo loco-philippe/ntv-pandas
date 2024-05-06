@@ -11,8 +11,8 @@ long_description = (here / "README.md").read_text(encoding="utf-8")
 
 setup(
     name="ntv_pandas",
-    version="1.1.1",
-    description="NTV-pandas : A tabular analyzer and a semantic, compact and reversible JSON-pandas converter",
+    version="2.0.0",
+    description="NTV-pandas : A tabular analyzer and a semantic, compact and reversible converter",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/loco-philippe/ntv-pandas/blob/main/README.md",
@@ -28,5 +28,5 @@ setup(
     packages=find_packages(include=['ntv_pandas', 'ntv_pandas.*']),
     package_data={'ntv_pandas': ['*.ini']},
     python_requires=">=3.9, <4",
-    install_requires=['tab_analysis', 'tab_dataset', 'json_ntv', 'numpy', 'pandas', 'shapely']
+    install_requires=['ntv_numpy', 'tab_analysis', 'tab_dataset', 'json_ntv', 'numpy', 'pandas', 'shapely']
 )

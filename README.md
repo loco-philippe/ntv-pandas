@@ -1,4 +1,4 @@
-### *NTV-pandas : A tabular analyzer and a semantic, compact and reversible JSON-pandas converter*
+### *NTV-pandas : A tabular analyzer and a semantic, compact and reversible converter*
 
 <img src="https://loco-philippe.github.io/ES/ntv_pandas.png" alt="ntv-pandas" align="middle" style="height:80px;">
 
@@ -8,38 +8,130 @@ NTV-pandas is referenced in the [pandas ecosystem](https://pandas.pydata.org/com
 
 # Why a NTV-pandas converter ?
 
-pandas provide JSON converter but three limitations are present:
+pandas provide IO converters but limitations are present:
 
-- the JSON-pandas converter take into account few data types,
-- the JSON-pandas converter is not always reversible (conversion round trip)
-- external data types (e.g. TableSchema types) are not included
+- the multidimensional structure is not taken into account,
+- the converters are not always reversible (conversion round trip),
+- the converters take into account few data types,
+- external data types (e.g. TableSchema types) are not included.
 
 pandas does not have a tool for analyzing tabular structures and detecting integrity errors
 
 ## main features
 
+The converter integrates:
+
+- interfaces with Xarray, scipp, JSON,
+- all the pandas `dtype` and the data-type associated to a JSON representation,
+- an always reversible conversion,
+- an identification of tabular and multidimensional structure,
+- a full compatibility with [Table Schema specification](http://dataprotocols.org/json-table-schema/#field-types-and-formats).
+
 The NTV-pandas converter uses the [semantic NTV format](https://loco-philippe.github.io/ES/JSON%20semantic%20format%20(JSON-NTV).htm)
 to include a large set of data types in a JSON representation.
 
-The converter integrates:
-
-- all the pandas `dtype` and the data-type associated to a JSON representation,
-- an always reversible conversion,
-- a full compatibility with [Table Schema specification](http://dataprotocols.org/json-table-schema/#field-types-and-formats)
-
 The NTV-pandas analyzer uses the [TAB-analysis](https://github.com/loco-philippe/tab-analysis/blob/main/README.md) tool to analyze and measure the relationships between Fields in DataFrame and the [TAB-dataset](https://github.com/loco-philippe/tab-dataset/blob/main/README.md) to identify integrity errors ([example](https://github.com/loco-philippe/ntv-pandas/tree/main/example#readme)).
 
-NTV-pandas was developped originally in the [json-NTV project](https://github.com/loco-philippe/NTV)
+The multidimensional converter uses the [NTV-numpy](https://github.com/loco-philippe/ntv-numpy/blob/main/README.md) multidimensional format and interfaces.
 
-## converter example
+NTV-pandas was developped originally in the [NTV project](https://github.com/loco-philippe/NTV)
+
+## multidimensional converter example
+
+In the example below, a Dataframe is converted to Xarray and scipp.
+
+The DataFrame resulting from these conversions are identical to the initial DataFrame (reversibility).
+
+```python
+In [1]: import pandas as pd
+        import ntv_pandas as npd
+
+In [2]: fruits = {'plants':      ['fruit', 'fruit', 'fruit', 'fruit', 'vegetable', 'vegetable', 'vegetable', 'vegetable'],
+                  'plts':        ['fr', 'fr', 'fr', 'fr', 've', 've', 've', 've'], 
+                  'quantity':    ['1 kg', '10 kg', '1 kg', '10 kg', '1 kg', '10 kg', '1 kg', '10 kg'],
+                  'product':     ['apple', 'apple', 'orange', 'orange', 'peppers', 'peppers', 'carrot', 'carrot'],
+                  'price':       [1, 10, 2, 20, 1.5, 15, 1.5, 20],
+                  'price level': ['low', 'low', 'high', 'high', 'low', 'low', 'high', 'high'],
+                  'group':       ['fruit 1', 'fruit 10', 'fruit 1', 'veget', 'veget', 'veget', 'veget', 'veget'],
+                  'id':          [1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008],
+                  'supplier':    ["sup1", "sup1", "sup1", "sup2", "sup2", "sup2", "sup2", "sup1"],
+                  'location':    ["fr", "gb", "es", "ch", "gb", "fr", "es", "ch"],
+                  'valid':       ["ok", "ok", "ok", "ok", "ok", "ok", "ok", "ok"]} 
+        df_fruits = pd.DataFrame(fruits)
+        df_fruits.npd.analysis(distr=True).partitions()   # return the list of partitions (a partition is a list of dimensions)
+Out[2]: 
+        [['plants', 'quantity', 'price level'],
+         ['quantity', 'price level', 'supplier'],
+         ['plants', 'location'],
+         ['quantity', 'product'],
+         ['supplier', 'location'],
+         ['id']]
+
+In [3]: kwargs = {'dims':['product', 'quantity'], 'datagroup': False, 'ntv_type': False, 'json_name': False}
+        xd_fruits = df_fruits.npd.to_xarray(**kwargs)
+        xd_fruits
+Out[3]: 
+        <xarray.Dataset> Size: 976B
+        Dimensions:      (product: 4, quantity: 2)
+        Coordinates:
+        * product      (product) <U7 112B 'apple' 'carrot' 'orange' 'peppers'
+        * quantity     (quantity) <U5 40B '1 kg' '10 kg'
+        plants       (product) <U9 144B 'fruit' 'vegetable' 'fruit' 'vegetable'
+        plts         (product) <U2 32B 'fr' 've' 'fr' 've'
+        price level  (product) <U4 64B 'low' 'high' 'high' 'low'
+        valid        <U2 8B 'ok'
+        Data variables:
+        group        (product, quantity) <U8 256B 'fruit 1' 'fruit 10' ... 'veget'
+        id           (product, quantity) int64 64B 1001 1002 1007 ... 1004 1005 1006
+        location     (product, quantity) <U2 64B 'fr' 'gb' 'es' ... 'ch' 'gb' 'fr'
+        price        (product, quantity) float64 64B 1.0 10.0 1.5 ... 20.0 1.5 15.0
+        supplier     (product, quantity) <U4 128B 'sup1' 'sup1' ... 'sup2' 'sup2'
+
+In [4]: sc_fruits = df_fruits.npd.to_scipp(**kwargs)
+        sc_fruits
+Out[4]: 
+        <scipp.Dataset>
+        Dimensions: Sizes[product:4, quantity:2, ]
+        Coordinates:
+        * plants                     string  [dimensionless]  (product)  ["fruit", "vegetable", "fruit", "vegetable"]
+        * plts                       string  [dimensionless]  (product)  ["fr", "ve", "fr", "ve"]
+        * price level                string  [dimensionless]  (product)  ["low", "high", "high", "low"]
+        * product                    string  [dimensionless]  (product)  ["apple", "carrot", "orange", "peppers"]
+        * quantity                   string  [dimensionless]  (quantity) ["1 kg", "10 kg"]
+        * valid                      string  [dimensionless]  ()  "ok"
+        Data:
+          group                      string  [dimensionless]  (product, quantity)  ["fruit 1", "fruit 10", ..., "veget", "veget"]
+          id                          int64  [dimensionless]  (product, quantity)  [1001, 1002, ..., 1005, 1006]
+          location                   string  [dimensionless]  (product, quantity)  ["fr", "gb", ..., "gb", "fr"]
+          price                     float64  [dimensionless]  (product, quantity)  [1, 10, ..., 1.5, 15]
+          supplier                   string  [dimensionless]  (product, quantity)  ["sup1", "sup1", ..., "sup2", "sup2"]       
+```
+
+Reversibility:
+
+```python
+In [5]: df_fruits_xd = npd.from_xarray(xd_fruits, **kwargs)
+        df_fruits_xd_sort = df_fruits_xd.reset_index()[list(df_fruits.columns)].sort_values(list(df_fruits.columns)).reset_index(drop=True)
+        df_fruits_sort = df_fruits.sort_values(list(df_fruits.columns)).reset_index(drop=True)
+        df_fruits_xd_sort.equals(df_fruits_sort)
+Out[5]: 
+        True
+
+In [6]: df_fruits_sc = npd.from_scipp(sc_fruits, **kwargs)
+        df_fruits_sc_sort = df_fruits_sc.reset_index()[list(df_fruits.columns)].sort_values(list(df_fruits.columns)).reset_index(drop=True)
+        df_fruits_sort = df_fruits.sort_values(list(df_fruits.columns)).reset_index(drop=True)
+        df_fruits_sc_sort.equals(df_fruits_sort)
+Out[6]: 
+        True
+```
+
+## JSON converter example
 
 In the example below, a DataFrame with multiple data types is converted to JSON (first to NTV format and then to Table Schema format).
 
 The DataFrame resulting from these JSON conversions are identical to the initial DataFrame (reversibility).
 
 With the existing JSON interface, these conversions are not possible.
-
-Data example:
 
 ```python
 In [1]: from shapely.geometry import Point
