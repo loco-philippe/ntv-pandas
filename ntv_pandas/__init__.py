@@ -22,16 +22,12 @@ This package contains the following classes and functions:
 - `ntv-pandas.ntv_pandas.accessors` :
     
     - `ntv-pandas.ntv_pandas.accessors.NpdSeriesAccessor`
-    - `ntv-pandas.ntv_pandas.accessors.NpdDataFrameAccessor`
-    
-    
+    - `ntv-pandas.ntv_pandas.accessors.NpdDataFrameAccessor`  
 """
-#from pathlib import Path
 from ntv_pandas.pandas_ntv_connector import DataFrameConnec, SeriesConnec, read_json
 from ntv_pandas.pandas_ntv_connector import to_json, as_def_type, equals, to_analysis
 from ntv_pandas.pandas_ntv_connector import from_xarray, from_scipp
 import ntv_pandas.accessors
-#import ntv_pandas.pandas_ntv_connector
 
 #path = Path(ntv_pandas.pandas_ntv_connector.__file__).parent
 
