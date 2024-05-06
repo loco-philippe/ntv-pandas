@@ -46,6 +46,7 @@ from json_ntv.ntv import Ntv, NtvConnector, NtvList, NtvSingle
 from json_ntv.ntv_util import NtvUtil
 from json_ntv.ntv_connector import ShapelyConnec
 from tab_dataset.cfield import Cfield
+from ntv_numpy import Xdataset
 
 path_ntv_pandas = Path(os.path.abspath(__file__)).parent
 
@@ -190,6 +191,27 @@ def to_json(pd_array, **kwargs):
         return json.dumps(jsn)
     return jsn
 
+def from_xarray(xdt, **kwargs):
+    ''' convert xarray.Dataset to pandas DataFrame.
+
+    *Parameters*
+
+    - **json_name**: Boolean (default True) - if False use full_name else json_name
+    - **info**: Boolean (default True) - if True add xdt.info in DataFrame.attrs
+    - **dims**: list of string (default None) - order of dimensions full_name to apply
+    '''
+    return Xdataset.from_xarray(xdt).to_dataframe(**kwargs)
+
+def from_scipp(sci, **kwargs):
+    ''' convert scipp.Dataset / scipp.DataArray / scipp.DataGroup to pandas DataFrame.
+
+    *Parameters*
+
+    - **json_name**: Boolean (default True) - if False use full_name else json_name
+    - **info**: Boolean (default True) - if True add xdt.info in DataFrame.attrs
+    - **dims**: list of string (default None) - order of dimensions full_name to apply
+    '''
+    return Xdataset.from_scipp(sci).to_dataframe(**kwargs)
 
 class DataFrameConnec(NtvConnector):
 

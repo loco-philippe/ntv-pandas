@@ -157,6 +157,35 @@ class Test_table_pandas(unittest.TestCase):
             self.assertFalse(fields[rang]['type'] is None)
             self.assertTrue(df.equals(npd.read_json(npd.to_json(df, table=True))))
 
+class Test_exports(unittest.TestCase):
+    
+    def test_dataframe(self):
+        fruits = {'plants':      ['fruit', 'fruit', 'fruit', 'fruit', 'vegetable', 'vegetable', 'vegetable', 'vegetable'],
+                  'plts':        ['fr', 'fr', 'fr', 'fr', 've', 've', 've', 've'], 
+                  'quantity':    ['1 kg', '10 kg', '1 kg', '10 kg', '1 kg', '10 kg', '1 kg', '10 kg'],
+                  'product':     ['apple', 'apple', 'orange', 'orange', 'peppers', 'peppers', 'carrot', 'carrot'],
+                  'price':       [1, 10, 2, 20, 1.5, 15, 1.5, 20],
+                  'price level': ['low', 'low', 'high', 'high', 'low', 'low', 'high', 'high'],
+                  'group':       ['fruit 1', 'fruit 10', 'fruit 1', 'veget', 'veget', 'veget', 'veget', 'veget'],
+                  'id':          [1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008],
+                  'supplier':    ["sup1", "sup1", "sup1", "sup2", "sup2", "sup2", "sup2", "sup1"],
+                  'location':    ["fr", "gb", "es", "ch", "gb", "fr", "es", "ch"],
+                  'valid':       ["ok", "ok", "ok", "ok", "ok", "ok", "ok", "ok"]}        
+        kwargs = {'dims':['product', 'quantity'], 'datagroup': False, 'ntv_type': False}
+        df_fruits = pd.DataFrame(fruits)
+        xd_fruits = df_fruits.npd.to_xarray(**kwargs)
+        df_fruits_xd = npd.from_xarray(xd_fruits, json_name=False)
+        df_fruits_xd_sort = df_fruits_xd.reset_index()[list(df_fruits.columns)].sort_values(list(df_fruits.columns)).reset_index(drop=True)
+        df_fruits_sort = df_fruits.sort_values(list(df_fruits.columns)).reset_index(drop=True)
+        self.assertTrue(df_fruits_xd_sort.equals(df_fruits_sort))
+        #self.assertEqual(list(xd_fruits.dims), ['product', 'quantity'])
+        sc_fruits = df_fruits.npd.to_scipp(**kwargs)
+        df_fruits_sc = npd.from_scipp(sc_fruits, json_name=False)
+        df_fruits_sc_sort = df_fruits_sc.reset_index()[list(df_fruits.columns)].sort_values(list(df_fruits.columns)).reset_index(drop=True)
+        df_fruits_sort = df_fruits.sort_values(list(df_fruits.columns)).reset_index(drop=True)
+        self.assertTrue(df_fruits_sc_sort.equals(df_fruits_sort))
+        #self.assertEqual(sc_fruits.dims, ('product', 'quantity'))
+                
 if __name__ == '__main__':
     
     unittest.main(verbosity=2)
