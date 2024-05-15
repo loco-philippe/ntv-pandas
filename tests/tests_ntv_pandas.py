@@ -239,10 +239,10 @@ class TestExports(unittest.TestCase):
                   'location':    ["fr", "gb", "es", "ch", "gb", "fr", "es", "ch"],
                   'valid':       ["ok", "ok", "ok", "ok", "ok", "ok", "ok", "ok"]}
         kwargs = {'dims': ['product', 'quantity'],
-                  'datagroup': False, 'ntv_type': False}
+                  'info': False, 'ntv_type': False}
         df_fruits = pd.DataFrame(fruits)
         xd_fruits = df_fruits.npd.to_xarray(**kwargs)
-        df_fruits_xd = npd.from_xarray(xd_fruits, json_name=False)
+        df_fruits_xd = npd.from_xarray(xd_fruits, ntv_type=False)
         df_fruits_xd_sort = df_fruits_xd.reset_index()[list(
             df_fruits.columns)].sort_values(list(df_fruits.columns)).reset_index(drop=True)
         df_fruits_sort = df_fruits.sort_values(
@@ -250,7 +250,7 @@ class TestExports(unittest.TestCase):
         self.assertTrue(df_fruits_xd_sort.equals(df_fruits_sort))
         # self.assertEqual(list(xd_fruits.dims), ['product', 'quantity'])
         sc_fruits = df_fruits.npd.to_scipp(**kwargs)
-        df_fruits_sc = npd.from_scipp(sc_fruits, json_name=False)
+        df_fruits_sc = npd.from_scipp(sc_fruits, ntv_type=False)
         df_fruits_sc_sort = df_fruits_sc.reset_index()[list(
             df_fruits.columns)].sort_values(list(df_fruits.columns)).reset_index(drop=True)
         df_fruits_sort = df_fruits.sort_values(
