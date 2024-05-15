@@ -497,7 +497,7 @@ class SeriesConnec(NtvConnector):
         NTVvalue and a ntv_type'''
         srs = pd.read_json(StringIO(json.dumps(data)),
                            dtype=dtype, typ='series')
-        if not pd_name is None:
+        if pd_name is not None:
             srs = srs.rename(pd_name)
         return PdUtil.convert(ntv_type, srs, tojson=False)
 
