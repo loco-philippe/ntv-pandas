@@ -68,11 +68,10 @@ class NpdDataFrameAccessor:
         *Parameters*
 
         - **dims**: list of string (default None) - order of dimensions to apply
-        - **dataset**: Boolean (default True) - if False and a single data_var,
-        return a sc.DataArray
-        - **datagroup**: Boolean (default True) - if True, return a sc.DataGroup
-        which contains the sc.DataArray/sc.Dataset and the other data else only
-        sc.DataArray/sc.Dataset"""
+        - **dataset** : Boolean (default True) - if False and a single data_var,
+        return a xr.DataArray
+        - **info** : Boolean (default True) - if True, add json representation
+        of 'relative' Xndarrays and 'data_arrays' Xndarrays in attrs"""
         return Xdataset.from_dataframe(self._obj, **kwargs).to_xarray(**kwargs)
 
     def to_scipp(self, **kwargs):
@@ -84,7 +83,7 @@ class NpdDataFrameAccessor:
         - **dims**: list of string (default None) - order of dimensions to apply
         - **dataset**: Boolean (default True) - if False and a single data_var,
         return a DataArray
-        - **datagroup**: Boolean (default True) - if True return a DataGroup with
+        - **info**: Boolean (default True) - if True return a DataGroup with
         metadata and data_arrays
         - **ntv_type**: Boolean (default True) - if True add ntv-type to the name"""
         return Xdataset.from_dataframe(self._obj, **kwargs).to_scipp(**kwargs)
