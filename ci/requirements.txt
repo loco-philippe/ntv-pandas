@@ -1,0 +1,17 @@
+scipp
+pandas
+xarray
+astropy
+
+shapely
+matplotlib
+folium
+
+flake8
+pdoc
+tabulate
+
+ntv-numpy
+tab-dataset
+json-ntv
+tab-analysis
