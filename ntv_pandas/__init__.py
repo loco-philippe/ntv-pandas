@@ -28,6 +28,7 @@ from ntv_pandas.pandas_ntv_connector import DataFrameConnec, SeriesConnec, read_
 from ntv_pandas.pandas_ntv_connector import to_json, as_def_type, equals, to_analysis
 from ntv_pandas.pandas_ntv_connector import from_xarray, from_scipp
 import ntv_pandas.accessors
+import ntv_pandas.xarray_accessors
 
 # path = Path(ntv_pandas.pandas_ntv_connector.__file__).parent
 
