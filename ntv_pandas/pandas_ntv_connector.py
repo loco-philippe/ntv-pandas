@@ -192,7 +192,7 @@ def from_xarray(xdt, **kwargs):
 
     *Parameters*
 
-    - **json_name**: Boolean (default True) - if False use full_name else json_name
+    - **ntv_type**: Boolean (default True) - if False use full_name else json_name
     - **info**: Boolean (default True) - if True add xdt.info in DataFrame.attrs
     - **dims**: list of string (default None) - order of dimensions full_name to apply
     '''
@@ -204,7 +204,7 @@ def from_scipp(sci, **kwargs):
 
     *Parameters*
 
-    - **json_name**: Boolean (default True) - if False use full_name else json_name
+    - **ntv_type**: Boolean (default True) - if False use full_name else json_name
     - **info**: Boolean (default True) - if True add xdt.info in DataFrame.attrs
     - **dims**: list of string (default None) - order of dimensions full_name to apply
     '''
