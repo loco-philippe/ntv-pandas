@@ -7,6 +7,7 @@ Created on Sun Oct 8 2023
 
 Accessor methods bound to pd.Series.npd, pd.DataFrame.npd
 """
+
 import pandas as pd
 from tab_analysis import AnaDataset
 from ntv_numpy import Xdataset
@@ -33,8 +34,8 @@ class NpdDataFrameAccessor:
         return AnaDataset(to_analysis(self._obj, distr))
 
     def check_relation(self, parent, child, typecoupl, value=True):
-        ''' Accessor for method `pandas_ntv_connector.check_relation` invoket as
-        `pd.DataFrame.npd.check_relation`'''
+        """Accessor for method `pandas_ntv_connector.check_relation` invoket as
+        `pd.DataFrame.npd.check_relation`"""
         return check_relation(self._obj, parent, child, typecoupl, value)
 
     def to_json(self, **kwargs):

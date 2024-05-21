@@ -1,0 +1,23 @@
+[tool.numpydoc_validation]
+checks = [
+    "all",
+    "EX01",
+    "SA01",
+    "ES01",
+]
+
+[tool.ruff]
+# E402: module level import not at top of file
+extend-exclude = [
+  "doc",
+]
+target-version = "py310"
+
+[tool.ruff.lint]
+# E402: module level import not at top of file
+extend-safe-fixes = [
+  "TID252", # absolute imports
+]
+ignore = [
+  "E402",
+]

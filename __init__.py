@@ -5,4 +5,4 @@ Created on Fri Sep 19 2023
 @author: philippe@loco-labs.io
 """
 
-name = 'ntv_pandas'
+name = "ntv_pandas"

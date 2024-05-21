@@ -23,10 +23,19 @@ setup(
         "Intended Audience :: Developers",
         "Topic :: Software Development :: Build Tools",
         "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 3"],
+        "Programming Language :: Python :: 3",
+    ],
     keywords="pandas, JSON-NTV, semantic JSON, development, environmental data",
-    packages=find_packages(include=['ntv_pandas', 'ntv_pandas.*']),
-    package_data={'ntv_pandas': ['*.ini']},
+    packages=find_packages(include=["ntv_pandas", "ntv_pandas.*"]),
+    package_data={"ntv_pandas": ["*.ini"]},
     python_requires=">=3.10, <4",
-    install_requires=['ntv_numpy', 'tab_analysis', 'tab_dataset', 'json_ntv', 'numpy', 'pandas', 'shapely']
+    install_requires=[
+        "ntv_numpy",
+        "tab_analysis",
+        "tab_dataset",
+        "json_ntv",
+        "numpy",
+        "pandas",
+        "shapely",
+    ],
 )

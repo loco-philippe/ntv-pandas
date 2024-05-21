@@ -47,7 +47,7 @@ In [1]: import pandas as pd
         import ntv_pandas as npd
 
 In [2]: fruits = {'plants':      ['fruit', 'fruit', 'fruit', 'fruit', 'vegetable', 'vegetable', 'vegetable', 'vegetable'],
-                  'plts':        ['fr', 'fr', 'fr', 'fr', 've', 've', 've', 've'], 
+                  'plts':        ['fr', 'fr', 'fr', 'fr', 've', 've', 've', 've'],
                   'quantity':    ['1 kg', '10 kg', '1 kg', '10 kg', '1 kg', '10 kg', '1 kg', '10 kg'],
                   'product':     ['apple', 'apple', 'orange', 'orange', 'peppers', 'peppers', 'carrot', 'carrot'],
                   'price':       [1, 10, 2, 20, 1.5, 15, 1.5, 20],
@@ -56,10 +56,10 @@ In [2]: fruits = {'plants':      ['fruit', 'fruit', 'fruit', 'fruit', 'vegetable
                   'id':          [1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008],
                   'supplier':    ["sup1", "sup1", "sup1", "sup2", "sup2", "sup2", "sup2", "sup1"],
                   'location':    ["fr", "gb", "es", "ch", "gb", "fr", "es", "ch"],
-                  'valid':       ["ok", "ok", "ok", "ok", "ok", "ok", "ok", "ok"]} 
+                  'valid':       ["ok", "ok", "ok", "ok", "ok", "ok", "ok", "ok"]}
         df_fruits = pd.DataFrame(fruits)
         df_fruits.npd.analysis(distr=True).partitions()   # return the list of partitions (a partition is a list of dimensions)
-Out[2]: 
+Out[2]:
         [['plants', 'quantity', 'price level'],
          ['quantity', 'price level', 'supplier'],
          ['plants', 'location'],
@@ -70,7 +70,7 @@ Out[2]:
 In [3]: kwargs = {'dims':['product', 'quantity'], 'datagroup': False, 'ntv_type': False, 'json_name': False}
         xd_fruits = df_fruits.npd.to_xarray(**kwargs)
         xd_fruits
-Out[3]: 
+Out[3]:
         <xarray.Dataset> Size: 976B
         Dimensions:      (product: 4, quantity: 2)
         Coordinates:
@@ -89,7 +89,7 @@ Out[3]:
 
 In [4]: sc_fruits = df_fruits.npd.to_scipp(**kwargs)
         sc_fruits
-Out[4]: 
+Out[4]:
         <scipp.Dataset>
         Dimensions: Sizes[product:4, quantity:2, ]
         Coordinates:
@@ -104,7 +104,7 @@ Out[4]:
           id                          int64  [dimensionless]  (product, quantity)  [1001, 1002, ..., 1005, 1006]
           location                   string  [dimensionless]  (product, quantity)  ["fr", "gb", ..., "gb", "fr"]
           price                     float64  [dimensionless]  (product, quantity)  [1, 10, ..., 1.5, 15]
-          supplier                   string  [dimensionless]  (product, quantity)  ["sup1", "sup1", ..., "sup2", "sup2"]       
+          supplier                   string  [dimensionless]  (product, quantity)  ["sup1", "sup1", ..., "sup2", "sup2"]
 ```
 
 Reversibility:
@@ -114,14 +114,14 @@ In [5]: df_fruits_xd = npd.from_xarray(xd_fruits, **kwargs)
         df_fruits_xd_sort = df_fruits_xd.reset_index()[list(df_fruits.columns)].sort_values(list(df_fruits.columns)).reset_index(drop=True)
         df_fruits_sort = df_fruits.sort_values(list(df_fruits.columns)).reset_index(drop=True)
         df_fruits_xd_sort.equals(df_fruits_sort)
-Out[5]: 
+Out[5]:
         True
 
 In [6]: df_fruits_sc = npd.from_scipp(sc_fruits, **kwargs)
         df_fruits_sc_sort = df_fruits_sc.reset_index()[list(df_fruits.columns)].sort_values(list(df_fruits.columns)).reset_index(drop=True)
         df_fruits_sort = df_fruits.sort_values(list(df_fruits.columns)).reset_index(drop=True)
         df_fruits_sc_sort.equals(df_fruits_sort)
-Out[6]: 
+Out[6]:
         True
 ```
 
