@@ -24,18 +24,12 @@ This package contains the following classes and functions:
     - `ntv-pandas.ntv_pandas.accessors.NpdSeriesAccessor`
     - `ntv-pandas.ntv_pandas.accessors.NpdDataFrameAccessor`
 """
-
-from ntv_pandas.pandas_ntv_connector import DataFrameConnec as DataFrameConnec
-from ntv_pandas.pandas_ntv_connector import SeriesConnec as SeriesConnec
-from ntv_pandas.pandas_ntv_connector import read_json as read_json
-from ntv_pandas.pandas_ntv_connector import equals as equals
-from ntv_pandas.pandas_ntv_connector import as_def_type as as_def_type
-from ntv_pandas.pandas_ntv_connector import to_json as to_json
-from ntv_pandas.pandas_ntv_connector import to_analysis as to_analysis
-from ntv_pandas.pandas_ntv_connector import from_xarray as from_xarray
-from ntv_pandas.pandas_ntv_connector import from_scipp as from_scipp
+from ntv_pandas.pandas_ntv_connector import DataFrameConnec, SeriesConnec, read_json
+from ntv_pandas.pandas_ntv_connector import to_json, as_def_type, equals, to_analysis
+from ntv_pandas.pandas_ntv_connector import from_xarray, from_scipp
 import ntv_pandas.pandas_accessors as pandas_accessors
 
-# path = Path(ntv_pandas.pandas_ntv_connector.__file__).parent
-
-# print('package :', __package__)
+__all__ = ['DataFrameConnec', 'SeriesConnec', 'read_json',
+           'to_json', 'as_def_type', 'equals', 'to_analysis',
+           'from_xarray', 'from_scipp',
+           'pandas_accessors']
