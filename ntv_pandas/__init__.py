@@ -34,7 +34,7 @@ from ntv_pandas.pandas_ntv_connector import to_json as to_json
 from ntv_pandas.pandas_ntv_connector import to_analysis as to_analysis
 from ntv_pandas.pandas_ntv_connector import from_xarray as from_xarray
 from ntv_pandas.pandas_ntv_connector import from_scipp as from_scipp
-from ntv_pandas.pandas_accessors import NpdDataFrameAccessor as NpdDataFrameAccessor
+import ntv_pandas.pandas_accessors as pandas_accessors
 
 # path = Path(ntv_pandas.pandas_ntv_connector.__file__).parent
 
