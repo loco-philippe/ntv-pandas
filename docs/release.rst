@@ -1,6 +1,13 @@
 Version x.y.z
 =============
 
+2.0.1 (2024-05-23)
+--------------------
+- bug #12 (python 3.10)
+- enh #4 (Unification of parameters in to_xarray, to_scipp and to_dataframe)
+- add CI processus (Github Workflow)
+- pre-commit integration
+
 2.0.0 (2024-05-06)
 --------------------
 - extension to multidimensional interfaces
