@@ -2,9 +2,11 @@
 
 ## Multidimensional examples
 
-The [first example](https://nbviewer.org/github/loco-philippe/ntv-pandas/blob/main/example/example_multidimensional.ipynb) presents the multidimensional interfaces.
+The [first notebook](https://nbviewer.org/github/loco-philippe/ntv-pandas/blob/main/example/example_multidimensional.ipynb) presents the multidimensional interfaces.
 
-A [second example](https://nbviewer.org/github/loco-philippe/ntv-pandas/blob/main/example/xarray_pandas_converter.ipynb) presents the Xarray interface.
+A [second notebook](https://nbviewer.org/github/loco-philippe/ntv-pandas/blob/main/example/xarray_pandas_converter.ipynb) show how the ntv_pandas converter complements the existing Xarray interface.
+
+A [simple use case](https://nbviewer.org/github/loco-philippe/ntv-pandas/blob/main/example/example_xarray.ipynb) shows the advantage of multidimensional representation (conversion Xarray of a dataset, optimization of data size).
 
 ## DataFrame integrity
 
