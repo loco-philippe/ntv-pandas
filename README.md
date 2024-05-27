@@ -44,7 +44,8 @@ The DataFrame resulting from these conversions are identical to the initial Data
 
 ```python
 In [1]: import pandas as pd
-        import ntv_pandas as npd
+        import ntv_pandas
+        import ntv_numpy
 
 In [2]: fruits = {'plants':      ['fruit', 'fruit', 'fruit', 'fruit', 'vegetable', 'vegetable', 'vegetable', 'vegetable'],
                   'plts':        ['fr', 'fr', 'fr', 'fr', 've', 've', 've', 've'],
@@ -67,7 +68,7 @@ Out[2]:
          ['supplier', 'location'],
          ['id']]
 
-In [3]: kwargs = {'dims':['product', 'quantity'], 'datagroup': False, 'ntv_type': False, 'json_name': False}
+In [3]: kwargs = {'dims':['product', 'quantity'], 'info': False, 'ntv_type': False}
         xd_fruits = df_fruits.npd.to_xarray(**kwargs)
         xd_fruits
 Out[3]:
@@ -110,7 +111,7 @@ Out[4]:
 Reversibility:
 
 ```python
-In [5]: df_fruits_xd = npd.from_xarray(xd_fruits, **kwargs)
+In [5]: df_fruits_xd = xd_fruits.nxr.to_dataframe(**kwargs)
         df_fruits_xd_sort = df_fruits_xd.reset_index()[list(df_fruits.columns)].sort_values(list(df_fruits.columns)).reset_index(drop=True)
         df_fruits_sort = df_fruits.sort_values(list(df_fruits.columns)).reset_index(drop=True)
         df_fruits_xd_sort.equals(df_fruits_sort)
