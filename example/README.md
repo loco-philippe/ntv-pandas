@@ -2,7 +2,7 @@
 
 ## Multidimensional examples
 
-The [first notebook](https://nbviewer.org/github/loco-philippe/ntv-pandas/blob/main/example/example_multidimensional.ipynb) presents the multidimensional interfaces.
+The [first notebook](https://nbviewer.org/github/loco-philippe/ntv-pandas/blob/main/example/example_multidimensional.ipynb) presents the interoperability between tabular data and multidimensional data.
 
 A [second notebook](https://nbviewer.org/github/loco-philippe/ntv-pandas/blob/main/example/xarray_pandas_converter.ipynb) show how the ntv_pandas converter complements the existing Xarray interface.
 
