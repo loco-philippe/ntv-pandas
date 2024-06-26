@@ -16,4 +16,6 @@ The [integrity notebook](https://nbviewer.org/github/loco-philippe/ntv-pandas/bl
 
 The [first notebook](https://nbviewer.org/github/loco-philippe/ntv-pandas/blob/main/example/example_json_pandas.ipynb) presents limitations of existing json-pandas interface.
 
+The [second notebook](https://nbviewer.org/github/loco-philippe/ntv-pandas/blob/main/example/example_size.ipynb) compares the size of table representations (CSV, JSON, CBOR, PARQUET) for the most common table structures.
+
 The [ntv-pandas](https://nbviewer.org/github/loco-philippe/ntv-pandas/blob/main/example/example_ntv_pandas.ipynb) notebook presents the JSON interface and the [table-pandas](https://nbviewer.org/github/loco-philippe/ntv-pandas/blob/main/example/example_table_pandas.ipynb) notebook presents the table-schema interface.
