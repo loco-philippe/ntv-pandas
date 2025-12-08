@@ -27,3 +27,4 @@ python/Tests/test.il
 python/.spyproject/config/workspace.ini
 *.il
 *.egg-info/
+.spyproject*
