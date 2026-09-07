@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Created on Wed Mar  1 09:57:26 2023
 
@@ -8,16 +7,16 @@ The `NTV.test_ntv` module contains the unit tests (class unittest) for the
 `NtvSingle`, `NtvList` and `NtvSet` classes.
 """
 
-import unittest
-import datetime
-from datetime import date
 import csv
+import datetime
+import unittest
+from datetime import date
 
 import pandas as pd
-import ntv_pandas as npd
-from shapely.geometry import Point, Polygon, LineString
-
 from json_ntv import Ntv, from_csv, to_csv
+from shapely.geometry import LineString, Point, Polygon
+
+import ntv_pandas as npd
 
 
 class TestNtvTabular(unittest.TestCase):
