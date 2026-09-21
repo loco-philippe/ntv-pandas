@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Created on Sun Oct 8 2023
 
@@ -9,10 +8,16 @@ Accessor methods bound to pd.Series.npd, pd.DataFrame.npd
 """
 
 import pandas as pd
-from tab_analysis import AnaDataset
 from ntv_numpy import Xdataset
-from ntv_pandas.pandas_ntv_connector import to_json, as_def_type, equals
-from ntv_pandas.pandas_ntv_connector import to_analysis, check_relation
+from tab_analysis import AnaDataset
+
+from ntv_pandas.pandas_ntv_connector import (
+    as_def_type,
+    check_relation,
+    equals,
+    to_analysis,
+    to_json,
+)
 
 try:
     # delete the accessor to avoid warning
