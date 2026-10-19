@@ -180,7 +180,7 @@ Out[5]: {':tab': {'index': [100, 200, 300, 400, 500],
 Reversibility:
 
 ```python
-In [6]: print(npd.read_json(df_to_json).equals(df))
+In[6]: print(npd.read_json(df_to_json).equals(df))
 Out[6]: True
 ```
 
@@ -214,6 +214,6 @@ Out[8]: {'fields': [{'name': 'index', 'type': 'integer'},
 Reversibility:
 
 ```python
-In [9]: print(npd.read_json(df_to_table).equals(df))
+In[9]: print(npd.read_json(df_to_table).equals(df))
 Out[9]: True
 ```
