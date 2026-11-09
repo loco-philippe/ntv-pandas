@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 ***NTV-pandas Package***
 
@@ -25,20 +24,28 @@ This package contains the following classes and functions:
     - `ntv-pandas.ntv_pandas.accessors.NpdDataFrameAccessor`
 """
 
-from ntv_pandas.pandas_ntv_connector import DataFrameConnec, SeriesConnec, read_json
-from ntv_pandas.pandas_ntv_connector import to_json, as_def_type, equals, to_analysis
-from ntv_pandas.pandas_ntv_connector import from_xarray, from_scipp
-import ntv_pandas.pandas_accessors as pandas_accessors
+from ntv_pandas import pandas_accessors
+from ntv_pandas.pandas_ntv_connector import (
+    DataFrameConnec,
+    SeriesConnec,
+    as_def_type,
+    equals,
+    from_scipp,
+    from_xarray,
+    read_json,
+    to_analysis,
+    to_json,
+)
 
 __all__ = [
     "DataFrameConnec",
     "SeriesConnec",
-    "read_json",
-    "to_json",
     "as_def_type",
     "equals",
-    "to_analysis",
-    "from_xarray",
     "from_scipp",
+    "from_xarray",
     "pandas_accessors",
+    "read_json",
+    "to_analysis",
+    "to_json",
 ]
